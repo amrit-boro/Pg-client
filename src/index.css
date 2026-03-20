@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #1f1fe0;
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #111121;
+
+  --font-display: "Plus Jakarta Sans", sans-serif;
+
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 3rem;
+}
+
+/* Optional utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

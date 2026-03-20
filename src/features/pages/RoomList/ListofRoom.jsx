@@ -1,412 +1,584 @@
-import { useMemo, useState } from "react";
-import RHeader from "./RHeader";
-import PropertyList from "./PropertyList";
-import RoomMap from "./RoomMap";
+import { useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useFilteredPg } from "../../../hooks/usePgdetail";
 
-function ListofRoom() {
-  const [sortBy, setSortBy] = useState("Relevance");
-  const [priceRange, setPriceRange] = useState([2000, 15000]);
-
-  const [filters, setFilters] = useState({
-    roomConfig: {
-      "1BHK": false,
-      "2BHK": false,
-    },
-    amenities: {
-      wifi: true,
-      parking: false,
-      ac: true,
-      laundry: false,
-      meal: false,
-      housekeeping: true,
-    },
-  });
-
-  const initialProperties = [
-    {
-      id: 0,
-      type: "FOR STUDENTS",
-      name: "Cozy Haven PG",
-      location: "Koramangala, Bangalore",
-      rating: 4.5,
-      reviews: 45,
-      price: 8500,
-      image:
-        "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=400&h=300&fit=crop",
-    },
-    {
-      id: 1,
-      type: "SHARED ROOM",
-      name: "Urban Nest Coliving",
-      location: "HSR Layout, Bangalore",
-      rating: 5,
-      reviews: 82,
-      price: 12000,
-      image:
-        "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=400&h=300&fit=crop",
-    },
-    {
-      id: 2,
-      type: "SINGLE ROOM",
-      name: "Peaceful Quarters",
-      location: "Indiranagar, Bangalore",
-      rating: 4,
-      reviews: 21,
-      price: 14500,
-      image:
-        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=400&h=300&fit=crop",
-    },
-    {
-      id: 3,
-      type: "1 BHK",
-      name: "Modern Living",
-      location: "Whitefield, Bangalore",
-      rating: 5,
-      reviews: 65,
-      price: 18000,
-      image:
-        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
-    },
-    {
-      id: 4,
-      type: "SHARED ROOM",
-      name: "Student's Corner",
-      location: "Marathahalli, Bangalore",
-      rating: 4.5,
-      reviews: 33,
-      price: 9000,
-      image:
-        "https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=400&h=300&fit=crop",
-    },
-    {
-      id: 5,
-      type: "SINGLE ROOM",
-      name: "City View Rooms",
-      location: "Jayanagar, Bangalore",
-      rating: 4,
-      reviews: 50,
-      price: 13000,
-      image:
-        "https://images.unsplash.com/photo-1554995207-c18c203602cb?w=400&h=300&fit=crop",
-    },
-  ];
-
-  // state that actually holds visible listings (demo: start with initialProperties)
-  const [listings, setListings] = useState(initialProperties);
-
-  const toggleRoomConfig = (config) => {
-    setFilters((prev) => ({
-      ...prev,
-      roomConfig: {
-        ...prev.roomConfig,
-        [config]: !prev.roomConfig[config],
-      },
-    }));
-  };
-
-  const toggleAmenity = (amenity) => {
-    setFilters((prev) => ({
-      ...prev,
-      amenities: {
-        ...prev.amenities,
-        [amenity]: !prev.amenities[amenity],
-      },
-    }));
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      roomConfig: { "1BHK": false, "2BHK": false },
-      amenities: {
-        wifi: false,
-        parking: false,
-        ac: false,
-        laundry: false,
-        meal: false,
-        housekeeping: false,
-      },
-    });
-    setPriceRange([2000, 15000]);
-    setListings(initialProperties);
-  };
-
-  // Build canonical payload from UI state
-  const buildFilterPayload = () => {
-    const selectedRoomConfigs = Object.entries(filters.roomConfig)
-      .filter(([, val]) => val)
-      .map(([k]) => k); // e.g. ["1BHK"]
-
-    const selectedAmenities = Object.entries(filters.amenities)
-      .filter(([, val]) => val)
-      .map(([k]) => k); // e.g. ["wifi","ac"]
-
-    const payload = {
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-      roomConfig: selectedRoomConfigs, // array (empty = none selected)
-      amenities: selectedAmenities, // array
-      sortBy,
-    };
-
-    return payload;
-  };
-
-  // Example client-side filter (demo). You can remove / replace with server call.
-  const applyFiltersClientSide = (payload) => {
-    const filtered = initialProperties.filter((p) => {
-      // price check
-      if (p.price < payload.minPrice || p.price > payload.maxPrice)
-        return false;
-
-      // room config check:
-      if (payload.roomConfig.length > 0) {
-        // normalize property type so we can check 1BHK vs "1 BHK" in data
-        const normalizedType = p.type.replace(/\s/g, "").toUpperCase(); // "1BHK", "FORSTUDENTS", ...
-        const matchesRoom = payload.roomConfig.some(
-          (rc) => rc.replace(/\s/g, "").toUpperCase() === normalizedType
-        );
-        if (!matchesRoom) return false;
-      }
-
-      // amenities: our demo properties don't have amenity lists, so we skip actual amenity filtering here.
-      // In a real app you would check p.amenities includes payload.amenities
-
-      return true;
-    });
-
-    // apply sorting
-    const sorted = [...filtered].sort((a, b) => {
-      if (payload.sortBy === "Price: Low to High") return a.price - b.price;
-      if (payload.sortBy === "Price: High to Low") return b.price - a.price;
-      if (payload.sortBy === "Rating") return b.rating - a.rating;
-      return 0; // Relevance: default order
-    });
-
-    return sorted;
-  };
-
-  // called when user clicks Apply Filters
-  const handleApply = async () => {
-    const payload = buildFilterPayload();
-    console.log("Filter payload:", payload);
-
-    // === Option A: Client-side demo filter (what you see here) ===
-    const newListings = applyFiltersClientSide(payload);
-    setListings(newListings);
-
-    // === Option B: Send to server (uncomment & change URL) ===
-    /*
-    try {
-      const res = await fetch('/api/listings/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
-      setListings(data.listings || []);
-    } catch (err) {
-      console.error(err);
-    }
-    */
-  };
-
-  // derived count (based on full dataset or server response depending on your flow)
-  const resultsCount = listings.length;
-
+function StarIcon({ className = "" }) {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      {/* Header */}
-      <RHeader />
-      {/* Main Content */}
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <div className="flex flex-wrap justify-between gap-3">
-            <div>
-              <h1 className="text-4xl font-black mb-1">
-                PGs & Rooms in Bangalore
-              </h1>
-              <p className="text-gray-500">
-                Showing {resultsCount} of {initialProperties.length} results
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-500">
-                Sort by:
-              </label>
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option>Relevance</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-                <option>Rating</option>
-              </select>
-            </div>
-          </div>
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  );
+}
+
+function HeartIcon({ filled = false, className = "" }) {
+  return filled ? (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+    </svg>
+  ) : (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+      />
+    </svg>
+  );
+}
+
+function MapIcon({ className = "" }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+      <line x1="8" y1="2" x2="8" y2="18" />
+      <line x1="16" y1="6" x2="16" y2="22" />
+    </svg>
+  );
+}
+
+function FilterIcon({ className = "" }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="8" y1="12" x2="16" y2="12" />
+      <line x1="11" y1="18" x2="13" y2="18" />
+    </svg>
+  );
+}
+
+function EmptyState() {
+  return (
+    <div className="col-span-full flex flex-col items-center justify-center min-h-[420px] py-10 px-4 text-center">
+      {/* Animated House Illustration */}
+      <div className="relative mb-6">
+        <div className="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center animate-pulse">
+          <svg
+            className="w-12 h-12 text-blue-200"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+          </svg>
         </div>
+        {/* Floating dots */}
+        <span
+          className="absolute top-0 right-0 w-3 h-3 bg-blue-300 rounded-full animate-bounce"
+          style={{ animationDelay: "0s" }}
+        />
+        <span
+          className="absolute bottom-1 left-0 w-2 h-2 bg-indigo-300 rounded-full animate-bounce"
+          style={{ animationDelay: "0.2s" }}
+        />
+        <span
+          className="absolute top-4 -left-3 w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0.4s" }}
+        />
+      </div>
 
-        <div className="grid grid-cols-12 gap-8">
-          {/* Filters Sidebar */}
-          <div className="col-span-12 lg:col-span-8">
-            <div className="grid grid-cols-12 gap-8">
-              <div className="col-span-12 xl:col-span-4">
-                <div className="sticky top-24 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-xl font-bold mb-6">Filters</h3>
+      <h2 className="text-lg font-black text-slate-700 mb-1 tracking-tight">
+        No Rooms Found
+      </h2>
+      <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-5">
+        Looks like there are no PGs matching your current filters. Try adjusting
+        the price range or clearing filters.
+      </p>
 
-                  {/* Price Range */}
-                  <div className="mb-8">
-                    <p className="text-base font-medium mb-4">Price Range</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>₹{priceRange[0].toLocaleString()}</span>
-                        <span>₹{priceRange[1].toLocaleString()}</span>
-                      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-700 text-white text-xs font-bold rounded-full hover:bg-blue-800 transition-all shadow-md shadow-blue-700/20 hover:scale-105"
+        >
+          Reset Filters
+        </button>
 
-                      <div className="relative w-full h-8 flex items-center">
-                        <input
-                          type="range"
-                          min="500"
-                          max="15000"
-                          step="500"
-                          value={priceRange[0]}
-                          onChange={(e) =>
-                            setPriceRange([
-                              Math.min(
-                                Number(e.target.value),
-                                priceRange[1] - 500
-                              ),
-                              priceRange[1],
-                            ])
-                          }
-                          className="w-full absolute appearance-none bg-transparent z-10 cursor-pointer"
-                          style={{ WebkitAppearance: "none" }}
-                        />
-                        <input
-                          type="range"
-                          min="500"
-                          max="15000"
-                          step="500"
-                          value={priceRange[1]}
-                          onChange={(e) =>
-                            setPriceRange([
-                              priceRange[0],
-                              Math.max(
-                                Number(e.target.value),
-                                priceRange[0] + 500
-                              ),
-                            ])
-                          }
-                          className="w-full absolute appearance-none bg-transparent z-20 cursor-pointer"
-                          style={{ WebkitAppearance: "none" }}
-                        />
-
-                        {/* Range Track */}
-                        <div className="absolute w-full h-2 bg-gray-200 rounded-full"></div>
-                        <div
-                          className="absolute h-2 bg-blue-500 rounded-full"
-                          style={{
-                            left: `${
-                              ((priceRange[0] - 500) / (15000 - 500)) * 100
-                            }%`,
-                            right: `${
-                              100 -
-                              ((priceRange[1] - 500) / (15000 - 500)) * 100
-                            }%`,
-                          }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Room Configuration */}
-                  <div className="mb-8">
-                    <h4 className="text-base font-medium mb-4">
-                      Room Configuration
-                    </h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => toggleRoomConfig("1BHK")}
-                        className={`h-10 px-3 rounded-md border transition-colors ${
-                          filters.roomConfig["1BHK"]
-                            ? "bg-blue-50 border-blue-500 text-blue-700"
-                            : "border-gray-300 text-gray-700"
-                        }`}
-                      >
-                        1 BHK
-                      </button>
-                      <button
-                        onClick={() => toggleRoomConfig("2BHK")}
-                        className={`h-10 px-3 rounded-md border transition-colors ${
-                          filters.roomConfig["2BHK"]
-                            ? "bg-blue-50 border-blue-500 text-blue-700"
-                            : "border-gray-300 text-gray-700"
-                        }`}
-                      >
-                        2 BHK
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Amenities */}
-                  <div className="mb-6">
-                    <h4 className="text-base font-medium mb-4">Amenities</h4>
-                    <div className="space-y-4">
-                      {[
-                        { key: "wifi", label: "Wi-Fi" },
-                        { key: "parking", label: "Parking" },
-                        { key: "ac", label: "Air Conditioning" },
-                        { key: "laundry", label: "Laundry" },
-                        { key: "meal", label: "Meal Included" },
-                        { key: "housekeeping", label: "Housekeeping" },
-                      ].map(({ key, label }) => (
-                        <label
-                          key={key}
-                          className="flex items-center gap-3 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-                            checked={filters.amenities[key]}
-                            onChange={() => toggleAmenity(key)}
-                          />
-                          <span className="text-sm">{label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-4 pt-6 border-t border-gray-200">
-                    <button
-                      onClick={handleApply}
-                      className="flex-1 h-11 bg-blue-500 text-white text-sm font-bold rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      Apply Filters
-                    </button>
-                    <button
-                      onClick={resetFilters}
-                      className="flex-1 h-11 bg-gray-200 text-gray-900 text-sm font-bold rounded-lg hover:bg-gray-300 transition-colors"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Property Listings */}
-              <PropertyList />
-            </div>
-          </div>
-
-          {/* Map */}
-          <RoomMap />
-        </div>
-      </main>
+        <a
+          href="#"
+          className="px-4 py-2 border border-slate-200 text-slate-500 text-xs font-bold rounded-full hover:bg-slate-100 transition-all"
+        >
+          Browse All
+        </a>
+      </div>
     </div>
   );
 }
 
-export default ListofRoom;
+function PGCard({ listing }) {
+  const [favorited, setFavorited] = useState(false);
+  const navigate = useNavigate();
+
+  return (
+    <div className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
+      {/* Image */}
+      <div className="relative h-40 sm:h-44 overflow-hidden">
+        <img
+          src={listing.img}
+          alt={listing.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-sm">
+          <StarIcon className="w-3 h-3 text-yellow-500" />
+          <span className="text-[10px] font-bold">{listing.rating}</span>
+        </div>
+        {listing.badge && (
+          <div
+            className={`absolute top-2.5 left-2.5 ${listing.badge.color} text-white px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider`}
+          >
+            {listing.badge.label}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-3.5 flex flex-col flex-1">
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="text-sm font-bold leading-tight hover:text-blue-700 cursor-pointer transition-colors pr-1">
+            {listing.name}
+          </h3>
+          <button
+            onClick={() => setFavorited(!favorited)}
+            className="shrink-0 mt-0.5"
+          >
+            <HeartIcon
+              filled={favorited}
+              className={`w-4 h-4 transition-colors ${favorited ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}
+            />
+          </button>
+        </div>
+        <p className="text-[11px] text-slate-400 mb-3 line-clamp-2 leading-relaxed">
+          {listing.description}
+        </p>
+
+        <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+              From
+            </p>
+            <p className="text-base font-black text-blue-700 leading-none">
+              ₹{listing.price.toLocaleString("en-IN")}
+              <span className="text-[11px] font-medium text-slate-400">
+                /mo
+              </span>
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/pgDetail?pgId=${listing.id}&type=single`)}
+            className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+          >
+            View Rooms
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function StayPG() {
+  const [sortBy, setSortBy] = useState("Popularity");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [email, setEmail] = useState("");
+  const [selectedPrice, setSelectedPrice] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filters = {
+    listing_type: searchParams.get("listing_type"),
+    maxPrice: searchParams.get("max_price"),
+    minPrice: searchParams.get("min_price"),
+  };
+
+  const { data, isLoading, error } = useFilteredPg(filters, currentPage);
+  const pgListings = data?.data;
+
+  const totalPages = 12;
+  const pageNumbers = [1, 2, 3];
+
+  const priceOptions = [
+    { label: "₹1k – ₹5k", min: 1000, max: 5000 },
+    { label: "₹5k – ₹10k", min: 5000, max: 10000 },
+    { label: "₹10k – ₹15k", min: 10000, max: 15000 },
+    { label: "₹15k+", min: 15000, max: Infinity },
+  ];
+
+  const handleSelected = (option) => {
+    setSelectedPrice(option);
+
+    const params = Object.fromEntries(searchParams.entries());
+    params.max_price = option.max === Infinity ? "" : option.max;
+    params.min_price = option.min;
+    setSearchParams(params);
+  };
+
+  const PRIMARY = "#1f1fe0";
+
+  const handleCurrentPage = (n) => {
+    setCurrentPage(n);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#f6f6f8] text-slate-900 font-sans antialiased">
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-3 sm:px-5 h-11 flex items-center justify-between">
+          {/* Logo + Nav */}
+          <div className="flex items-center gap-5">
+            <div className="flex items-center gap-1" style={{ color: PRIMARY }}>
+              <span className="material-symbols-outlined text-lg font-bold">
+                domain
+              </span>
+              <h1 className="text-xs font-extrabold tracking-tight">
+                StayEasy PG
+              </h1>
+            </div>
+            <nav className="hidden md:flex items-center gap-4">
+              {["Properties", "How it works", "Community", "Support"].map(
+                (item) => (
+                  <a
+                    key={item}
+                    href="#"
+                    className="text-[11px] font-semibold hover:text-blue-700 transition-colors"
+                  >
+                    {item}
+                  </a>
+                ),
+              )}
+            </nav>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-1.5">
+            <button className="p-1 rounded-full hover:bg-slate-100 transition-colors">
+              <span className="material-symbols-outlined text-base">
+                search
+              </span>
+            </button>
+            <button
+              className="px-3 py-1 text-white text-[11px] font-bold rounded-full transition-transform hover:scale-105"
+              style={{
+                backgroundColor: PRIMARY,
+                boxShadow: "0 3px 10px rgba(31,31,224,0.2)",
+              }}
+            >
+              Sign In
+            </button>
+            <div
+              className="w-7 h-7 rounded-full bg-cover bg-center ring-2 ring-slate-100"
+              style={{
+                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHxhdmLkd8w-sh901_qSLkGXBagFqG1MW3k4PLzh4kJFCHX-0_AErGcjqLVK8JhVHDmIW1yy0upnCIn3Q8r3nla4KL_3b9bnav5lHzo4zMKZtqrXWVjkKlCOubd4xe6tpqHIuOUrovY0YRai2cpm__eW_b0bym5bUmykincr8fzq59mQ_nYHhmgH_3vecflQOkITd8ddi6QSXy2nWNM8XpO7aA_NoOu0DUGVYJw6bmCfemgTaL_2goTLyrNHBlbUoC9fwgXzkml5Q")`,
+              }}
+            />
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto w-full px-3 sm:px-5 lg:px-10 py-4 sm:py-6">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1 text-xs text-slate-400 mb-4">
+          {["Home", "Bangalore"].map((crumb) => (
+            <span key={crumb} className="flex items-center gap-1">
+              <a href="#" className="hover:text-blue-700 transition-colors">
+                {crumb}
+              </a>
+              <svg
+                className="w-2.5 h-2.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </span>
+          ))}
+          <span className="text-slate-600 font-medium">PG Accommodations</span>
+        </nav>
+
+        {/* Mobile filter toggle */}
+        <div className="lg:hidden mb-3">
+          <button
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm hover:bg-slate-50 transition-colors"
+          >
+            <FilterIcon className="w-3.5 h-3.5" />
+            {filtersOpen ? "Hide Filters" : "Show Filters"}
+            {selectedPrice && (
+              <span className="ml-1 bg-blue-700 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                1
+              </span>
+            )}
+          </button>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-5">
+          {/* ── Sidebar ── */}
+          <aside
+            className={`w-full lg:w-52 shrink-0 ${filtersOpen ? "block" : "hidden"} lg:block`}
+          >
+            <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm lg:sticky lg:top-16">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold">Filters</h3>
+                <button
+                  onClick={() => {
+                    setSelectedPrice(null);
+                  }}
+                  className="text-[11px] font-bold text-blue-700 hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+
+              {/* Price Range */}
+              <div>
+                <label className="text-xs font-bold block mb-2.5 text-slate-600 uppercase tracking-wider">
+                  Price / mo
+                </label>
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5">
+                  {priceOptions.map((option, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSelected(option)}
+                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
+                        selectedPrice?.label === option.label
+                          ? "bg-blue-700 text-white"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ── Main Content ── */}
+          <div className="flex-1 min-w-0">
+            {/* Title bar */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-4">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight mb-0.5">
+                  PGs near College
+                </h1>
+                <p className="text-xs text-slate-400">
+                  158 verified properties
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="flex items-center gap-1.5 bg-slate-200 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-slate-300 transition-colors">
+                  <MapIcon className="w-3.5 h-3.5" />
+                  Map
+                </button>
+                <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5">
+                  <span className="text-[10px] font-bold text-slate-400">
+                    Sort:
+                  </span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-transparent border-none text-[11px] font-bold focus:ring-0 p-0 cursor-pointer outline-none"
+                  >
+                    <option>Popularity</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                    <option>Top Rated</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 min-h-[120px]">
+              {pgListings && pgListings.length > 0 ? (
+                pgListings.map((item) => {
+                  const listing = {
+                    id: item.id,
+                    name: item.title,
+                    description: item.description,
+                    price: Number(item.starting_price),
+                    rating: 4.5,
+                    img:
+                      item.photos?.[0]?.url ||
+                      "https://via.placeholder.com/400",
+                    badge: null,
+                    tags: [],
+                  };
+                  return <PGCard key={listing.id} listing={listing} />;
+                })
+              ) : (
+                <EmptyState />
+              )}
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-8 flex items-center justify-center gap-1.5">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="w-8 h-8 cursor-pointer rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors"
+              >
+                <svg
+                  className="w-3 h-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+              {pageNumbers.map((n) => (
+                <button
+                  key={n}
+                  onClick={() => handleCurrentPage(n)}
+                  className={`w-8 h-8 rounded-full cursor-pointer font-bold text-xs transition-all ${
+                    currentPage === n
+                      ? "bg-blue-700 text-white shadow-md shadow-blue-700/30"
+                      : "border border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <span className="px-1 text-slate-400 text-sm">…</span>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                className={`w-8 h-8 cursor-pointer rounded-full font-bold text-xs border transition-all ${
+                  currentPage === totalPages
+                    ? "bg-blue-700 text-white border-blue-700 shadow-md shadow-blue-700/30"
+                    : "border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                12
+              </button>
+              <button
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                className="w-8 h-8 cursor-pointer rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-100 transition-colors"
+              >
+                <svg
+                  className="w-3 h-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="bg-slate-900 text-white py-10 px-4 sm:px-6 lg:px-10 mt-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1 space-y-3">
+            <div className="flex items-center gap-1.5 text-blue-400">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+              <h2 className="text-base font-black tracking-tight text-white">
+                StayPG
+              </h2>
+            </div>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              Making quality shared accommodation accessible for students and
+              professionals across India.
+            </p>
+          </div>
+          <div>
+            <h4 className="font-bold text-sm mb-3">Company</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              {["About Us", "Careers", "Privacy Policy", "Terms"].map(
+                (item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="hover:text-blue-400 transition-colors"
+                    >
+                      {item}
+                    </a>
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-sm mb-3">Cities</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              {["Bangalore", "Pune", "Mumbai", "Delhi"].map((city) => (
+                <li key={city}>
+                  <a href="#" className="hover:text-blue-400 transition-colors">
+                    {city}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-sm mb-3">Newsletter</h4>
+            <p className="text-slate-400 text-xs mb-3">
+              Get updates on new properties.
+            </p>
+            <div className="flex bg-slate-800 rounded-full p-0.5">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-transparent border-none focus:ring-0 text-xs flex-1 px-3 py-1.5 outline-none text-white placeholder:text-slate-500"
+                placeholder="Your email"
+              />
+              <button className="bg-blue-700 text-white px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-blue-800 transition-colors">
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-slate-500 text-[11px]">
+          <p>© 2024 StayPG Accommodation Pvt Ltd.</p>
+          <div className="flex gap-4">
+            {["Instagram", "Twitter", "LinkedIn"].map((s) => (
+              <a
+                key={s}
+                href="#"
+                className="hover:text-white transition-colors"
+              >
+                {s}
+              </a>
+            ))}
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

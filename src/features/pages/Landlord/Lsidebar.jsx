@@ -71,11 +71,12 @@ function Lsidebar() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <button className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-blue-600 text-white text-sm font-bold leading-normal hover:bg-blue-700 transition-colors">
-            <NavLink to="/landlordCrud" className="truncate">
-              Add New Listing
-            </NavLink>
-          </button>
+          <NavLink
+            to="/landlordCrud"
+            className="flex min-w-[84px] w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-blue-600 text-white text-sm font-bold leading-normal hover:bg-blue-700 transition-colors"
+          >
+            <p className="truncate">Add New Listing</p>
+          </NavLink>
           <a
             className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100"
             href="#"

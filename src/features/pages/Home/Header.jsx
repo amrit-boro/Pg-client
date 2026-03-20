@@ -2,9 +2,14 @@ import { Link } from "react-router-dom";
 import { useGetUser } from "../../../hooks/useUser";
 
 function Header() {
-  const { data: user, isLoggedIn, error } = useGetUser();
-  console.log("userDetail: ", user);
-  console.log("Error: ", error);
+  // const { data: user, isLoggedIn, error } = useGetUser();
+  const isLoggedIn = true;
+  const user = {
+    data: {
+      profilePictureUrl: "http://imga1.jpg",
+      fullName: "Amrit",
+    },
+  };
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200 backdrop-blur-sm bg-opacity-95">
       <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-10 py-1.5 md:py-2">

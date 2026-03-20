@@ -8,9 +8,9 @@ import RoomDetail from "./features/pages/RoomDetail/RoomDetail";
 import LandlordProfile from "./features/pages/Landlord/LandlordProfile";
 import GuestaProfile from "./features/pages/Guest/GuestsProfile";
 import LandlordCrud from "./features/pages/Landlord/LandlordCrud";
-import Login from "./features/pages/Login/Login";
-import Signup from "./features/pages/SignUp/Signup";
+
 import AigeneratedDes from "./features/pages/Landlord/AigeneratedDes";
+import StayEasyRoom from "./features/pages/RoomList/StayEasyRoom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,14 +28,15 @@ const router = createBrowserRouter([
       { path: "/", element: <Homepage /> },
       { path: "/room", element: <ListofRoom /> },
       { path: "/guest", element: <GuestaProfile /> },
-      { path: "/landlord", element: <LandlordProfile /> },
-      { path: "/roomDetail/:id", element: <RoomDetail /> },
+      { path: "/c", element: <LandlordProfile /> },
+      { path: "/pgDetail", element: <RoomDetail /> },
+      { path: "/roomdetail", element: <StayEasyRoom /> },
       { path: "/landlordCrud", element: <LandlordCrud /> },
       { path: "/generatedPage", element: <AigeneratedDes /> },
     ],
   },
-  { path: "/login", element: <Login /> },
-  { path: "/signup", element: <Signup /> },
+  // { path: "/login", element: <Login /> },
+  // { path: "/signup", element: <Signup /> },
 ]);
 
 export default function App() {

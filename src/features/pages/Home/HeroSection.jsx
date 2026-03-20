@@ -1,96 +1,82 @@
 import { useState } from "react";
 import { Search, Home, Eye, Briefcase } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 function HeroSection() {
-  const [location, setLocation] = useState("");
-  const [propertyType, setPropertyType] = useState("PG");
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const propertyType = searchParams.get("listing_type") || "";
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("listing_type", value); // ?type=Girls%PG
+      return params;
+    });
+  };
 
   return (
     <>
       <section
-        className="relative min-h-[420px] flex items-center justify-center bg-cover bg-center"
+        className="relative min-h-[520px] flex items-center justify-center bg-cover bg-center"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.48) 100%), url(https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&h=900&fit=crop)",
+            "linear-gradient(rgba(15,23,42,0.65), rgba(15,23,42,0.75)), url(https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1600&h=900&fit=crop)",
         }}
       >
-        <div className="text-center px-4 sm:px-6 max-w-3xl">
-          <h1 className="text-white text-3xl sm:text-4xl md:text-5xl font-extrabold mb-3">
-            Find Your Next Home
+        <div className="w-full max-w-4xl px-6 text-center">
+          {/* Heading */}
+          <h1 className="text-white text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-4">
+            Find Your Perfect Stay
           </h1>
 
-          <p className="text-white/90 text-sm sm:text-base mb-6 max-w-xl mx-auto">
-            Discover the perfect PG or room that fits your lifestyle and budget.
-            Search from thousands of verified listings.
+          <p className="text-slate-200 text-base sm:text-lg mb-10 max-w-2xl mx-auto">
+            Browse verified PGs and rental spaces tailored to your budget and
+            lifestyle.
           </p>
 
+          {/* Search Card */}
           <form
             onSubmit={(e) => {
-              e.preventDefault(); /* handle submit if needed */
+              e.preventDefault();
+              const params = new URLSearchParams();
+              if (propertyType) {
+                params.set("listing_type", propertyType);
+              }
+              navigate(`/room?${params.toString()}`);
             }}
-            className="w-full mx-auto max-w-2xl"
-            aria-label="Search form"
+            className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-4 sm:p-5"
           >
-            <div className="flex flex-col sm:flex-row items-stretch gap-2 bg-white/20 backdrop-blur-sm p-2 rounded-xl">
-              {/* Property type select */}
-              <div className="flex items-center w-full sm:w-1/3 h-12 sm:h-12 bg-white rounded-lg overflow-hidden">
-                <div className="flex items-center justify-center px-3">
-                  <Home className="text-gray-500 w-4 h-4" aria-hidden="true" />
-                </div>
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+              {/* Select */}
+              <div className="flex items-center flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 focus-within:ring-2 focus-within:ring-blue-500 transition">
+                <Home className="text-slate-500 w-5 h-5 mr-2" />
                 <select
-                  aria-label="Property type"
-                  className="flex-1 px-3 text-sm bg-transparent border-0 focus:outline-none focus:ring-0"
+                  className="w-full bg-transparent py-3 text-sm font-medium text-slate-700 focus:outline-none"
                   value={propertyType}
-                  onChange={(e) => setPropertyType(e.target.value)}
+                  onChange={handleChange}
                 >
-                  <option>Girls PG</option>
-                  <option>Boys PG</option>
-                  <option>Room</option>
-                  <option>Hotel</option>
-                  <option>Apartment</option>
+                  <option value="">Select property type</option>
+                  <option value="girls_pg">Girls PG</option>
+                  <option value="boys_pg">Boys PG</option>
+                  <option value="rent">Rent</option>
                 </select>
               </div>
-              {/* Location input */}
-              <div className="flex items-center w-full sm:w-1/2 h-12 sm:h-12 bg-white rounded-lg overflow-hidden">
-                <div className="flex items-center justify-center px-3">
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  aria-label="Enter location or city"
-                  type="text"
-                  className="flex-1 px-3 text-sm sm:text-sm bg-transparent border-0 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-white/50 placeholder:text-gray-400"
-                  placeholder="Enter location or city"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                />
-              </div>
 
-              {/* Search button */}
-              <div className="w-full sm:w-auto min-w-[110px]">
-                <Link
-                  to="/room"
-                  className="inline-flex items-center justify-center h-12 w-full px-4 rounded-lg bg-blue-500 text-white text-sm font-semibold hover:bg-blue-600 transition-colors"
-                  role="button"
-                  aria-label="Search"
-                >
-                  Search
-                </Link>
-              </div>
+              {/* Button */}
+              <button
+                type="submit"
+                disabled={!propertyType}
+                className={`sm:w-auto w-full px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition-all duration-200
+                ${
+                  !propertyType
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg"
+                }`}
+              >
+                Search
+              </button>
             </div>
           </form>
         </div>

@@ -7,7 +7,7 @@ function RoomMap() {
           <img
             // You might need to set an explicit height on the image if the
             // parent div doesn't have one and you want to control its size.
-            className="w-full h-96 object-cover"
+            className="w-full h-76 object-cover"
             src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=1000&fit=crop"
             alt="Map of Bangalore showing property locations"
           />

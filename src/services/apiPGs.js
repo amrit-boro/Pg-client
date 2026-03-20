@@ -3,7 +3,7 @@ import axios from "axios";
 export async function getAllPg() {
   try {
     const response = await axios.get(
-      "http://localhost:8000/api/v1/pg/getAllpg"
+      `${import.meta.env.VITE_API_URL}/api/v1/pg/getsome`,
     );
     return response;
   } catch (error) {
@@ -11,6 +11,44 @@ export async function getAllPg() {
     throw error;
   }
 }
+
+export async function getFilteredPg(filters) {
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/pg/getAllPgs`;
+  const response = await axios.get(baseUrl, {
+    params: filters,
+  });
+  return response.data;
+}
+
+export async function getFilteredListings({ queryKey }) {
+  const [_key, filters, page] = queryKey;
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/filterlistings`;
+  const response = await axios.get(baseUrl, {
+    params: {
+      ...filters,
+      page,
+    },
+  });
+
+  return response.data;
+}
+
+export async function getAllRoomsByPgId(pgId, type) {
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/pg/getAllRooms`;
+  const res = await axios.get(baseUrl, {
+    params: { pgId, type },
+  });
+  console.log(res);
+  return res.data;
+}
+
+export async function getPgdetailById(id) {
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/pg/getListingById/${id}`;
+  const res = await axios.get(baseUrl);
+
+  return res.data;
+}
+// =====================================================================================
 
 export async function getPgDetail() {
   try {
@@ -29,17 +67,15 @@ export async function getPgDetail() {
 export async function getdetailById(id) {
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/v1/pg/getSinglePg/${id}`,
-      {
-        withCredentials: true,
-      }
+      `http://localhost:8000/api/v1/pg/getRoom/${id}`,
     );
-    console.log("result: ", res);
-    console.log("resutl typ: ", typeof res);
-    return res?.data?.data;
-  } catch (err) {
-    console.log(err);
-    throw new Error("Error fetching pg data: ", err);
+    if (!res.data) {
+      throw new Error("Invalid response from server");
+    }
+    console.log("response: ", res);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data.message || "Failed to fetch room details";
   }
 }
 
@@ -69,7 +105,7 @@ export async function createPg(formData) {
         headers: {
           // "Content-Type": "multipart/form-data" // Optional: Axios detects this automatically
         },
-      }
+      },
     );
     console.log("pg create result: ", res);
     return res;
@@ -77,4 +113,16 @@ export async function createPg(formData) {
     console.log(error);
     throw new Error(error.response?.data?.message || "Error creating pg");
   }
+}
+
+export async function fetchRooms({ queryKey }) {
+  const [, pgId, type] = queryKey;
+
+  const res = await fetch(`http://localhost:8000/api/v1/pg/gets?pgId=${pgId}`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch rooms");
+  }
+
+  return res.json();
 }

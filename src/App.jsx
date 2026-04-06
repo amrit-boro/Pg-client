@@ -11,6 +11,9 @@ import LandlordCrud from "./features/pages/Landlord/LandlordCrud";
 
 import AigeneratedDes from "./features/pages/Landlord/AigeneratedDes";
 import StayEasyRoom from "./features/pages/RoomList/StayEasyRoom";
+import Profile from "./features/pages/Guest/Profile";
+import MyRooms from "./features/pages/Landlord/Myrooms";
+import SavedListings from "./features/pages/Landlord/SavedListings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,10 +29,19 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <Homepage /> },
-      { path: "/room", element: <ListofRoom /> },
+      { path: "/listings", element: <ListofRoom /> },
+      {
+        path: "/account",
+        element: <Profile />,
+        children: [
+          { index: true, element: <SavedListings /> }, // /account
+          { path: "saved", element: <SavedListings /> }, // /account/saved  👈 add this back
+          { path: "rooms", element: <MyRooms /> }, // /account/rooms
+        ],
+      },
       { path: "/guest", element: <GuestaProfile /> },
-      { path: "/c", element: <LandlordProfile /> },
-      { path: "/pgDetail", element: <RoomDetail /> },
+      // { path: "/c", element: <LandlordProfile /> },
+      { path: "/listingDetail", element: <RoomDetail /> },
       { path: "/roomdetail", element: <StayEasyRoom /> },
       { path: "/landlordCrud", element: <LandlordCrud /> },
       { path: "/generatedPage", element: <AigeneratedDes /> },
@@ -43,7 +55,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
-      <RouterProvider router={router} />;
+      <RouterProvider router={router} />
     </QueryClientProvider>
   );
 }

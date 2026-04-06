@@ -3,7 +3,7 @@ import axios from "axios";
 export async function getAllPg() {
   try {
     const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/v1/pg/getsome`,
+      `${import.meta.env.VITE_API_URL}/api/v1/listings/top-4`,
     );
     return response;
   } catch (error) {
@@ -22,7 +22,7 @@ export async function getFilteredPg(filters) {
 
 export async function getFilteredListings({ queryKey }) {
   const [_key, filters, page] = queryKey;
-  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/filterlistings`;
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/listings/filters`;
   const response = await axios.get(baseUrl, {
     params: {
       ...filters,
@@ -33,17 +33,16 @@ export async function getFilteredListings({ queryKey }) {
   return response.data;
 }
 
-export async function getAllRoomsByPgId(pgId, type) {
-  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/pg/getAllRooms`;
+export async function getAllRoomsByPgId(pgId, type, page) {
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/listings/${pgId}/rooms`;
   const res = await axios.get(baseUrl, {
-    params: { pgId, type },
+    params: { type, page },
   });
-  console.log(res);
   return res.data;
 }
 
 export async function getPgdetailById(id) {
-  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/pg/getListingById/${id}`;
+  const baseUrl = `${import.meta.env.VITE_API_URL}/api/v1/listings/${id}`;
   const res = await axios.get(baseUrl);
 
   return res.data;
@@ -67,7 +66,7 @@ export async function getPgDetail() {
 export async function getdetailById(id) {
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/v1/pg/getRoom/${id}`,
+      `http://localhost:8000/api/v1/listings/room/${id}`,
     );
     if (!res.data) {
       throw new Error("Invalid response from server");
@@ -118,11 +117,11 @@ export async function createPg(formData) {
 export async function fetchRooms({ queryKey }) {
   const [, pgId, type] = queryKey;
 
-  const res = await fetch(`http://localhost:8000/api/v1/pg/gets?pgId=${pgId}`);
+  const res = await fetch(
+    `http://localhost:8000/api/v1/listings/total/${pgId}`,
+  );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch rooms");
-  }
+  if (!res.ok) throw new Error("Failed to fetch rooms");
 
   return res.json();
 }

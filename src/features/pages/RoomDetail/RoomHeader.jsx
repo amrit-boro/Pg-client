@@ -27,24 +27,24 @@ function RoomHeader() {
 
           <div className="flex items-center gap-6">
             <nav className="hidden md:flex items-center gap-8">
-              <a
+              <Link
                 href="#"
                 className="text-sm font-medium hover:text-blue-500 transition-colors"
               >
                 Explore
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="text-sm font-medium hover:text-blue-500 transition-colors"
               >
                 List your property
-              </a>
-              <a
+              </Link>
+              <LInk
                 href="#"
                 className="text-sm font-medium hover:text-blue-500 transition-colors"
               >
                 About Us
-              </a>
+              </LInk>
               <a
                 href="#"
                 className="text-sm font-medium hover:text-blue-500 transition-colors"

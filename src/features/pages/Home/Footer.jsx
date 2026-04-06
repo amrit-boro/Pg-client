@@ -7,6 +7,7 @@ import {
   Twitter,
   Github,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
@@ -40,28 +41,19 @@ function Footer() {
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   Careers
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -72,28 +64,19 @@ function Footer() {
             </h3>
             <ul className="mt-4 space-y-2">
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   FAQs
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className="text-gray-500 hover:text-blue-500 transition-colors"
-                >
+                <Link className="text-gray-500 hover:text-blue-500 transition-colors">
                   Terms of Service
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -103,24 +86,24 @@ function Footer() {
               Connect
             </h3>
             <div className="mt-4 flex space-x-4">
-              <a
+              <Link
                 href="#"
                 className="text-gray-400 hover:text-blue-500 transition-colors"
               >
                 <Facebook className="h-6 w-6" />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="text-gray-400 hover:text-blue-500 transition-colors"
               >
                 <Twitter className="h-6 w-6" />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="text-gray-400 hover:text-blue-500 transition-colors"
               >
                 <Github className="h-6 w-6" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>

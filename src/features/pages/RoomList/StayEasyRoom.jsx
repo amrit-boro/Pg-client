@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRoomdetails } from "../../../hooks/usePgdetail";
 import { useParams, useSearchParams } from "react-router-dom";
+import { useRoomPrice } from "../../../hooks/useRoomPrice";
 
 // Add to index.html <head>:
 // <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -84,10 +85,67 @@ function RoomDetailsSkeleton() {
   );
 }
 
+const BookingSidebarSkeleton = () => {
+  return (
+    <aside className="w-full lg:w-[300px]">
+      <div className="sticky top-14 space-y-3 animate-pulse">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-lg space-y-4">
+          {/* Price */}
+          <div className="flex justify-between items-start">
+            <div className="space-y-2">
+              <div className="h-5 w-24 bg-slate-200 rounded" />
+              <div className="h-3 w-32 bg-slate-200 rounded" />
+            </div>
+            <div className="h-5 w-20 bg-slate-200 rounded-full" />
+          </div>
+
+          {/* Details */}
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 bg-slate-200 rounded" />
+                  <div className="h-3 w-20 bg-slate-200 rounded" />
+                </div>
+                <div className="h-3 w-12 bg-slate-200 rounded" />
+              </div>
+            ))}
+          </div>
+
+          {/* Buttons */}
+          <div className="space-y-2 pt-3 border-t border-slate-100">
+            <div className="h-10 w-full bg-slate-200 rounded-xl" />
+            <div className="h-10 w-full bg-slate-200 rounded-xl" />
+          </div>
+
+          <div className="h-3 w-3/4 mx-auto bg-slate-200 rounded" />
+        </div>
+
+        {/* Trust Badge */}
+        <div className="rounded-xl p-3.5 border flex items-center gap-3 bg-slate-100 border-slate-200">
+          <div className="h-6 w-6 bg-slate-200 rounded-full" />
+          <div className="space-y-1 w-full">
+            <div className="h-3 w-28 bg-slate-200 rounded" />
+            <div className="h-3 w-40 bg-slate-200 rounded" />
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
 export default function StayEasyRoom() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const { data, isLoading } = useRoomdetails(id);
+  const { data: price, isLoading: priceLoading, isError } = useRoomPrice(id);
+
+  if (priceLoading) {
+    return <BookingSidebarSkeleton />;
+  }
 
   if (isLoading) {
     return <RoomDetailsSkeleton />;
@@ -96,6 +154,7 @@ export default function StayEasyRoom() {
   const roomData = data?.data;
   console.log("roomdta: ", roomData);
 
+  // Room specification-------
   const specs = [
     {
       label: "Room Size",
@@ -117,6 +176,7 @@ export default function StayEasyRoom() {
     },
   ];
 
+  // Room ameneties---------
   const amenities = Object.entries(roomData?.utility_details || {})
     .filter(([_, value]) => value === true)
     .map(([key]) => ({
@@ -329,7 +389,7 @@ export default function StayEasyRoom() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-lg font-bold">
-                      ₹18,000
+                      ₹ {price.price_per_month}
                       <span className="text-xs font-normal text-slate-500">
                         /mo
                       </span>

@@ -44,7 +44,7 @@ function OccupancySelector({ roomCounts, PRIMARY }) {
                 : { backgroundColor: "#e2e8f0", color: "#475569" }
             }
           >
-            {counts.single} AVAILABLE
+            {counts.single} AVAILABLE jfsldjflsjl
           </span>
         </div>
 

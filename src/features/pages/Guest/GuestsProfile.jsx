@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Gheader from "./Gheader";
+import { Link } from "react-router-dom";
 
 const bookingsData = [
   {
@@ -150,7 +151,7 @@ export default function GuestaProfile() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 mt-4">
-                    <a
+                    <Link
                       className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 text-blue-600"
                       href="#"
                     >
@@ -158,8 +159,8 @@ export default function GuestaProfile() {
                       <p className="text-sm font-bold leading-normal">
                         My Bookings
                       </p>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100"
                       href="#"
                     >
@@ -167,8 +168,8 @@ export default function GuestaProfile() {
                       <p className="text-sm font-medium leading-normal">
                         Saved Listings
                       </p>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100"
                       href="#"
                     >
@@ -176,8 +177,8 @@ export default function GuestaProfile() {
                       <p className="text-sm font-medium leading-normal">
                         Messages
                       </p>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100"
                       href="#"
                     >
@@ -185,17 +186,17 @@ export default function GuestaProfile() {
                       <p className="text-sm font-medium leading-normal">
                         Profile Settings
                       </p>
-                    </a>
+                    </Link>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <a
+                  <Link
                     className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 text-red-600"
                     href="#"
                   >
                     <Icon name="logout" className="text-2xl" />
                     <p className="text-sm font-medium leading-normal">Logout</p>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </aside>

@@ -55,19 +55,22 @@ export const usePgById = (id) => {
   return { data, isLoading, error };
 };
 
-export const useRoomsByPg = (pgId, type) => {
+export const useRoomsByPg = (pgId, type, page) => {
+  console.log("pgid: ", pgId, "type:", type, "page: ", page);
   const { data, isLoading, error } = useQuery({
-    queryKey: ["getRoomsByPg", pgId, type],
-    queryFn: () => getAllRoomsByPgId(pgId, type),
+    queryKey: ["getRoomsByPg", pgId, type, page],
+    queryFn: () => getAllRoomsByPgId(pgId, type, page),
   });
   return { data, isLoading, error };
 };
 
 export function useRooms(pgId, type) {
-  return useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["rooms", pgId, type],
     queryFn: fetchRooms,
     enabled: Boolean(pgId && type),
     staleTime: 1000 * 60 * 5,
   });
+
+  return { data, isLoading, error };
 }

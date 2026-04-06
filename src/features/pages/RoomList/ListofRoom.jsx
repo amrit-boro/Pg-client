@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useFilteredPg } from "../../../hooks/usePgdetail";
+import { SearchOverlay } from "./SearchOverlay";
 
 function StarIcon({ className = "" }) {
   return (
@@ -122,7 +128,6 @@ function EmptyState() {
 
 function PGCard({ listing }) {
   const [favorited, setFavorited] = useState(false);
-  const navigate = useNavigate();
 
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
@@ -178,28 +183,41 @@ function PGCard({ listing }) {
               </span>
             </p>
           </div>
-          <button
-            onClick={() => navigate(`/pgDetail?pgId=${listing.id}&type=single`)}
+          <Link
+            to={`/listingDetail?pgId=${listing.id}&type=single`}
             className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
           >
             View Rooms
-          </button>
+          </Link>
+          {/* 
+          <div
+            className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+            onClick={(e) => {
+              navigate(`/listingDetail?pgId=${listing.id}&type=single`);
+            }}
+          >
+            View Rooms
+          </div> */}
         </div>
       </div>
     </div>
   );
 }
 
+// SEARCH
+
 export default function StayPG() {
-  const [sortBy, setSortBy] = useState("Popularity");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [email, setEmail] = useState("");
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const filters = {
-    listing_type: searchParams.get("listing_type"),
+    listing_type: searchParams.get("type"),
     maxPrice: searchParams.get("max_price"),
     minPrice: searchParams.get("min_price"),
   };
@@ -232,9 +250,22 @@ export default function StayPG() {
     setCurrentPage(n);
   };
 
+  // ── called when user picks a result from the popup ──
+  const handleSearchSelect = (item) => {
+    // Option A: show ONLY that one result in the grid
+    setPgListings([item]);
+    setIsFiltered(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#f6f6f8] text-slate-900 font-sans antialiased">
       {/* ── Header ── */}
+      <SearchOverlay
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={handleSearchSelect}
+        navigate={navigate}
+      />
       <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-3 sm:px-5 h-11 flex items-center justify-between">
           {/* Logo + Nav */}
@@ -243,7 +274,10 @@ export default function StayPG() {
               <span className="material-symbols-outlined text-lg font-bold">
                 domain
               </span>
-              <h1 className="text-xs font-extrabold tracking-tight">
+              <h1
+                onClick={() => navigate("/")}
+                className="text-xs cursor-pointer font-extrabold tracking-tight"
+              >
                 StayEasy PG
               </h1>
             </div>
@@ -264,7 +298,10 @@ export default function StayPG() {
 
           {/* Actions */}
           <div className="flex items-center gap-1.5">
-            <button className="p-1 rounded-full hover:bg-slate-100 transition-colors">
+            <button
+              className="p-1 rounded-full hover:bg-slate-100 transition-colors"
+              onClick={() => setSearchOpen(true)} // 👈 just add this
+            >
               <span className="material-symbols-outlined text-base">
                 search
               </span>
@@ -291,7 +328,7 @@ export default function StayPG() {
       <main className="max-w-7xl mx-auto w-full px-3 sm:px-5 lg:px-10 py-4 sm:py-6">
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1 text-xs text-slate-400 mb-4">
-          {["Home", "Bangalore"].map((crumb) => (
+          {["Home", "Near College"].map((crumb) => (
             <span key={crumb} className="flex items-center gap-1">
               <a href="#" className="hover:text-blue-700 transition-colors">
                 {crumb}
@@ -311,7 +348,9 @@ export default function StayPG() {
               </svg>
             </span>
           ))}
-          <span className="text-slate-600 font-medium">PG Accommodations</span>
+          <span className="text-slate-600 font-medium">
+            PG-Rent Accommodations
+          </span>
         </nav>
 
         {/* Mobile filter toggle */}
@@ -341,10 +380,16 @@ export default function StayPG() {
                 <button
                   onClick={() => {
                     setSelectedPrice(null);
+
+                    // Also clear the price params from the URL
+                    const params = Object.fromEntries(searchParams.entries());
+                    delete params.max_price;
+                    delete params.min_price;
+                    setSearchParams(params);
                   }}
-                  className="text-[11px] font-bold text-blue-700 hover:underline"
+                  className="text-[11px] cursor-pointer font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
                 >
-                  Clear
+                  Reset
                 </button>
               </div>
 
@@ -358,7 +403,7 @@ export default function StayPG() {
                     <button
                       key={i}
                       onClick={() => handleSelected(option)}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
+                      className={`w-full text-left px-2.5 py-1.5 cursor-pointer rounded-lg text-xs font-medium transition ${
                         selectedPrice?.label === option.label
                           ? "bg-blue-700 text-white"
                           : "bg-slate-100 hover:bg-slate-200 text-slate-700"
@@ -380,30 +425,6 @@ export default function StayPG() {
                 <h1 className="text-xl sm:text-2xl font-black tracking-tight mb-0.5">
                   PGs near College
                 </h1>
-                <p className="text-xs text-slate-400">
-                  158 verified properties
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1.5 bg-slate-200 px-3 py-1.5 rounded-full text-xs font-bold hover:bg-slate-300 transition-colors">
-                  <MapIcon className="w-3.5 h-3.5" />
-                  Map
-                </button>
-                <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                  <span className="text-[10px] font-bold text-slate-400">
-                    Sort:
-                  </span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-transparent border-none text-[11px] font-bold focus:ring-0 p-0 cursor-pointer outline-none"
-                  >
-                    <option>Popularity</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
-                    <option>Top Rated</option>
-                  </select>
-                </div>
               </div>
             </div>
 
@@ -416,8 +437,9 @@ export default function StayPG() {
                     name: item.title,
                     description: item.description,
                     price: Number(item.starting_price),
-                    rating: 4.5,
+                    rating: item.avg_rating,
                     img:
+                      item.photo_url ||
                       item.photos?.[0]?.url ||
                       "https://via.placeholder.com/400",
                     badge: null,

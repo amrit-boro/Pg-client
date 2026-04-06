@@ -5,13 +5,13 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 function HeroSection() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const propertyType = searchParams.get("listing_type") || "";
+  const propertyType = searchParams.get("type") || "";
 
   const handleChange = (e) => {
     const value = e.target.value;
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
-      params.set("listing_type", value); // ?type=Girls%PG
+      params.set("type", value); // ?type=Girls%PG
       return params;
     });
   };
@@ -42,9 +42,9 @@ function HeroSection() {
               e.preventDefault();
               const params = new URLSearchParams();
               if (propertyType) {
-                params.set("listing_type", propertyType);
+                params.set("type", propertyType);
               }
-              navigate(`/room?${params.toString()}`);
+              navigate(`/listings?${params.toString()}`);
             }}
             className="bg-white/90 backdrop-blur-lg shadow-2xl rounded-2xl p-4 sm:p-5"
           >
@@ -68,7 +68,7 @@ function HeroSection() {
               <button
                 type="submit"
                 disabled={!propertyType}
-                className={`sm:w-auto w-full px-6 py-3 rounded-xl font-semibold text-sm shadow-md transition-all duration-200
+                className={`sm:w-auto w-full px-6 py-3 cursor-pointer rounded-xl font-semibold text-sm shadow-md transition-all duration-200
                 ${
                   !propertyType
                     ? "bg-gray-400 cursor-not-allowed"

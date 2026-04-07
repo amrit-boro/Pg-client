@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { useFilteredPg } from "../../../hooks/usePgdetail";
 import { SearchOverlay } from "./SearchOverlay";
+import { useSaveListing } from "../../../hooks/useSaveListing";
 
 function StarIcon({ className = "" }) {
   return (
@@ -125,9 +126,19 @@ function EmptyState() {
     </div>
   );
 }
-
 function PGCard({ listing }) {
   const [favorited, setFavorited] = useState(false);
+  const [saved, setSaved] = useState(listing.isSaved ?? false); // ← init from server
+  const { save, remove, isPending } = useSaveListing();
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (saved) {
+      remove(listing.id, { onSuccess: () => setSaved(false) });
+    } else {
+      save(listing.id, { onSuccess: () => setSaved(true) });
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
@@ -163,15 +174,19 @@ function PGCard({ listing }) {
           >
             <HeartIcon
               filled={favorited}
-              className={`w-4 h-4 transition-colors ${favorited ? "text-red-500" : "text-slate-300 hover:text-red-400"}`}
+              className={`w-4 h-4 transition-colors ${
+                favorited ? "text-red-500" : "text-slate-300 hover:text-red-400"
+              }`}
             />
           </button>
         </div>
+
         <p className="text-[11px] text-slate-400 mb-3 line-clamp-2 leading-relaxed">
           {listing.description}
         </p>
 
         <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+          {/* Price */}
           <div>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5">
               From
@@ -183,27 +198,42 @@ function PGCard({ listing }) {
               </span>
             </p>
           </div>
-          <Link
-            to={`/listingDetail?pgId=${listing.id}&type=single`}
-            className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-          >
-            View Rooms
-          </Link>
-          {/* 
-          <div
-            className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-            onClick={(e) => {
-              navigate(`/listingDetail?pgId=${listing.id}&type=single`);
-            }}
-          >
-            View Rooms
-          </div> */}
+
+          <div className="flex items-center gap-2">
+            {/* Save / Bookmark button */}
+            <button
+              onClick={handleSave}
+              disabled={isPending} // ← removed `|| saved`
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all disabled:opacity-50"
+              style={{
+                backgroundColor: saved ? "rgba(31,31,224,0.08)" : "transparent",
+                border: "1px solid",
+                borderColor: saved ? "rgba(31,31,224,0.2)" : "#e2e8f0",
+              }}
+            >
+              <span
+                className="material-symbols-outlined text-base transition-all"
+                style={{
+                  color: saved ? "#1f1fe0" : "#94a3b8",
+                  fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0",
+                }}
+              >
+                {isPending ? "hourglass_empty" : "bookmark"}
+              </span>
+            </button>
+
+            <Link
+              to={`/listingDetail?pgId=${listing.id}&type=single`}
+              className="bg-blue-700/10 hover:bg-blue-700 hover:text-white cursor-pointer text-blue-700 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+            >
+              View Rooms
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
 // SEARCH
 
 export default function StayPG() {
@@ -439,11 +469,12 @@ export default function StayPG() {
                     price: Number(item.starting_price),
                     rating: item.avg_rating,
                     img:
-                      item.photo_url ||
-                      item.photos?.[0]?.url ||
+                      item.photos?.find((p) => p.isCover)?.url ||
+                      item.photos?.[0]?.url || // fallback if no cover is set
                       "https://via.placeholder.com/400",
                     badge: null,
                     tags: [],
+                    isSaved: item.isSaved, // ← add this if missing
                   };
                   return <PGCard key={listing.id} listing={listing} />;
                 })

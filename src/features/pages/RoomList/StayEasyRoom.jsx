@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRoomdetails } from "../../../hooks/usePgdetail";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useRoomPrice } from "../../../hooks/useRoomPrice";
 
 // Add to index.html <head>:
@@ -139,6 +139,7 @@ const BookingSidebarSkeleton = () => {
 
 export default function StayEasyRoom() {
   const [searchParams] = useSearchParams();
+  const nagivate = useNavigate();
   const id = searchParams.get("id");
   const { data, isLoading } = useRoomdetails(id);
   const { data: price, isLoading: priceLoading, isError } = useRoomPrice(id);
@@ -203,11 +204,14 @@ export default function StayEasyRoom() {
               <span className="material-symbols-outlined text-xl font-bold">
                 domain
               </span>
-              <h1 className="text-sm font-extrabold tracking-tight">
+              <h1
+                onClick={() => nagivate("/")}
+                className="text-sm font-extrabold cursor-pointer tracking-tight"
+              >
                 StayEasy PG
               </h1>
             </div>
-            <nav className="hidden md:flex items-center gap-5">
+            {/* <nav className="hidden md:flex items-center gap-5">
               {["Properties", "How it works", "Community", "Support"].map(
                 (item) => (
                   <a
@@ -219,7 +223,7 @@ export default function StayEasyRoom() {
                   </a>
                 ),
               )}
-            </nav>
+            </nav> */}
           </div>
           <div className="flex items-center gap-2">
             <button className="p-1.5 rounded-full hover:bg-slate-100 transition-colors">

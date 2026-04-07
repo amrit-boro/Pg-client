@@ -24,6 +24,7 @@ function RoomList() {
         <div className="flex gap-4 min-w-max sm:min-w-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {pgDetails.map((listing) => {
             const imageUrl =
+              listing.photos?.find((p) => p.isCover)?.url ||
               listing.photos?.[0]?.url ||
               "https://placehold.co/600x400?text=No+Image";
 
@@ -74,7 +75,7 @@ function RoomList() {
                       <span className="text-xs text-gray-400">/ month</span>
                     </div>
                   </div>
-                  {/* 
+
                   <Link
                     to={`/listingDetail?pgId=${listing.id}&type=single`}
                     className="w-full h-8 rounded-lg bg-blue-50 text-blue-600 
@@ -82,14 +83,7 @@ function RoomList() {
                 transition-colors flex items-center justify-center"
                   >
                     View Details
-                  </Link> */}
-                  <div
-                    onClick={() => {
-                      navigate(`/listingDetail?pgId=${listing.id}&type=single`);
-                    }}
-                  >
-                    View Details
-                  </div>
+                  </Link>
                 </div>
               </div>
             );

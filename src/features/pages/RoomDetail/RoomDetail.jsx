@@ -470,8 +470,8 @@ export default function UrbanSanctuary() {
           </div>
 
           {/* Sidebar */}
-          <aside className="lg:col-span-4 relative">
-            <div className="sticky top-16 space-y-3">
+          <aside className="lg:col-span-4 relative self-start">
+            <div className="sticky top-14 space-y-3">
               <BookingCard selectedRoom={selectedRoom} />
 
               <div

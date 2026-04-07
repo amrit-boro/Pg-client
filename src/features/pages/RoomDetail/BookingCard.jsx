@@ -1,16 +1,17 @@
 import { useRoomPrice } from "../../../hooks/useRoomPrice";
 
 const PRIMARY = "#1f1fe0";
-
-export default function BookingCard({ selectedRoom }) {
+function BookingCard({ selectedRoom }) {
   const { data, isLoading, isError } = useRoomPrice(selectedRoom);
 
   const price = data
     ? `₹${Number(data.price_per_month).toLocaleString("en-IN")}`
     : "—";
+
   const deposit = data
     ? `₹${Number(data.security_deposit).toLocaleString("en-IN")}`
     : "—";
+
   const roomNumber = data?.room_number ?? "—";
   const roomType = data?.room_type?.toUpperCase() ?? "—";
 
@@ -18,135 +19,176 @@ export default function BookingCard({ selectedRoom }) {
     ? Number(data.price_per_month) + Number(data.security_deposit)
     : null;
 
-  return (
-    <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-lg shadow-slate-200/50">
-      {/* Price header */}
-      <div className="flex items-end gap-1.5 mb-4">
-        {isLoading ? (
-          <div className="h-7 w-24 bg-slate-100 animate-pulse rounded-lg" />
-        ) : (
-          <>
-            <span className="text-xl font-extrabold" style={{ color: PRIMARY }}>
-              {price}
-            </span>
-            <span className="text-slate-500 mb-0.5 text-xs font-medium">
-              / month
-            </span>
-          </>
-        )}
-      </div>
+  const bookingDetails = [
+    { label: "Room Type", icon: "bed", value: roomType },
+    { label: "Monthly Rent", icon: "payments", value: price },
+    { label: "Security Deposit", icon: "lock", value: deposit },
+    {
+      label: "Total Due",
+      icon: "receipt_long",
+      value: totalDue ? `₹${totalDue.toLocaleString("en-IN")}` : "—",
+    },
+  ];
 
-      <div className="space-y-2.5 mb-4">
-        {/* Selected unit badge */}
+  return (
+    <aside className="w-full lg:w-[300px]">
+      <div className="sticky top-14 space-y-3">
+        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-lg space-y-4">
+          {/* Price */}
+          <div className="flex justify-between items-start">
+            <div>
+              {isLoading ? (
+                <>
+                  <div className="h-6 w-24 bg-slate-200 animate-pulse rounded mb-1" />
+                  <div className="h-3 w-28 bg-slate-100 animate-pulse rounded" />
+                </>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold">
+                    {price}
+                    <span className="text-xs font-normal text-slate-500">
+                      /mo
+                    </span>
+                  </h2>
+                  <p className="text-slate-500 text-xs mt-0.5">
+                    All-inclusive pricing
+                  </p>
+                </>
+              )}
+            </div>
+
+            <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full">
+              {isLoading ? "..." : "Available"}
+            </span>
+          </div>
+
+          {/* Selected Unit */}
+          <div className="space-y-2.5 mb-4">
+            <div
+              className="p-3 rounded-xl flex flex-col gap-0.5"
+              style={{
+                backgroundColor: "rgba(31,31,224,0.05)",
+                border: "1px solid rgba(31,31,224,0.2)",
+              }}
+            >
+              <span
+                className="text-[9px] font-black uppercase tracking-widest"
+                style={{ color: "rgba(31,31,224,0.6)" }}
+              >
+                Selected Unit
+              </span>
+
+              <div className="flex justify-between items-center">
+                {isLoading ? (
+                  <>
+                    <div className="h-4 w-20 bg-slate-200 animate-pulse rounded" />
+                    <div className="h-4 w-12 bg-slate-200 animate-pulse rounded" />
+                  </>
+                ) : (
+                  <>
+                    <span className="font-bold text-xs">Room {roomNumber}</span>
+                    <span
+                      className="text-[9px] font-bold bg-white px-1.5 py-0.5 rounded border"
+                      style={{
+                        color: PRIMARY,
+                        borderColor: "rgba(31,31,224,0.1)",
+                      }}
+                    >
+                      Active
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-2">
+            {isLoading
+              ? Array(4)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 bg-slate-200 animate-pulse rounded" />
+                        <div className="h-3 w-20 bg-slate-200 animate-pulse rounded" />
+                      </div>
+                      <div className="h-3 w-16 bg-slate-200 animate-pulse rounded" />
+                    </div>
+                  ))
+              : bookingDetails.map((detail) => (
+                  <div
+                    key={detail.label}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-base">
+                        {detail.icon}
+                      </span>
+                      <span className="text-xs">{detail.label}</span>
+                    </div>
+                    <span className="font-semibold text-xs">
+                      {detail.value}
+                    </span>
+                  </div>
+                ))}
+          </div>
+
+          {/* Buttons */}
+          <div className="space-y-2 pt-3 border-t border-slate-100">
+            <button
+              disabled={isLoading}
+              className="w-full text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-1.5 disabled:opacity-60"
+              style={{
+                backgroundColor: PRIMARY,
+                boxShadow: "0 4px 14px rgba(31,31,224,0.3)",
+              }}
+            >
+              {isLoading ? "Loading..." : "Confirm Booking"}
+            </button>
+
+            <button
+              disabled={isLoading}
+              className="w-full border border-slate-200 py-3 rounded-xl font-semibold text-sm disabled:opacity-60"
+            >
+              Schedule a Visit
+            </button>
+          </div>
+
+          <p className="text-center text-slate-400 text-[10px]">
+            No credit card required. Secure your spot with an advance deposit.
+          </p>
+        </div>
+
+        {/* Trust Badge */}
         <div
-          className="p-3 rounded-xl flex flex-col gap-0.5"
+          className="rounded-xl p-3.5 border flex items-center gap-3"
           style={{
             backgroundColor: "rgba(31,31,224,0.05)",
-            border: "1px solid rgba(31,31,224,0.2)",
+            borderColor: "rgba(31,31,224,0.1)",
           }}
         >
           <span
-            className="text-[9px] font-black uppercase tracking-widest"
-            style={{ color: "rgba(31,31,224,0.6)" }}
+            className="material-symbols-outlined text-2xl"
+            style={{ color: PRIMARY }}
           >
-            Selected Unit
+            verified_user
           </span>
-          <div className="flex justify-between items-center">
-            {isLoading ? (
-              <div className="h-4 w-20 bg-slate-100 animate-pulse rounded" />
-            ) : (
-              <>
-                <span className="font-bold text-xs">Room {roomNumber}</span>
-                <span
-                  className="text-[9px] font-bold bg-white px-1.5 py-0.5 rounded border"
-                  style={{ color: PRIMARY, borderColor: "rgba(31,31,224,0.1)" }}
-                >
-                  {roomType}
-                </span>
-              </>
-            )}
+          <div>
+            <p className="text-slate-900 font-bold text-xs">
+              StayEasy Verified
+            </p>
+            <p className="text-slate-500 text-[10px]">
+              Property inspected and verified for quality standards.
+            </p>
           </div>
         </div>
-
-        {/* Move-in / lock-in */}
-        <div className="grid grid-cols-2 gap-2">
-          {[
-            { label: "Move-in Date", value: "Oct 12, 2023" },
-            { label: "Min Lock-in", value: "3 Months" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="p-2.5 rounded-xl border border-slate-200 flex flex-col gap-0.5"
-            >
-              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                {item.label}
-              </span>
-              <span className="font-bold text-xs">{item.value}</span>
-            </div>
-          ))}
-        </div>
       </div>
-
-      {/* Price breakdown */}
-      <div className="space-y-2 mb-4 bg-slate-50 p-4 rounded-xl">
-        {isLoading ? (
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-4 bg-slate-100 animate-pulse rounded" />
-            ))}
-          </div>
-        ) : isError ? (
-          <p className="text-xs text-red-500 text-center">
-            Failed to load pricing
-          </p>
-        ) : (
-          <>
-            {[
-              { label: "Monthly Rent", value: price },
-              { label: "Security Deposit", value: deposit },
-              { label: "Maintenance Fee", value: "INCLUDED", green: true },
-            ].map((item) => (
-              <div key={item.label} className="flex justify-between text-xs">
-                <span className="text-slate-500">{item.label}</span>
-                <span
-                  className={`font-bold ${item.green ? "text-green-600" : ""}`}
-                >
-                  {item.value}
-                </span>
-              </div>
-            ))}
-            <div className="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center">
-              <span className="font-extrabold text-slate-900 uppercase tracking-tighter text-xs">
-                Total Due Today
-              </span>
-              <span className="text-base font-black" style={{ color: PRIMARY }}>
-                {totalDue !== null
-                  ? `₹${totalDue.toLocaleString("en-IN")}`
-                  : "—"}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-
-      <button
-        className="w-full py-3 text-white rounded-xl font-bold text-sm transition-all mb-3 disabled:opacity-50"
-        disabled={isLoading || isError || !data}
-        style={{
-          backgroundColor: PRIMARY,
-          boxShadow: "0 6px 16px rgba(31,31,224,0.25)",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
-        onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-      >
-        Confirm Selection
-      </button>
-
-      <p className="text-center text-[9px] text-slate-400 uppercase font-black tracking-widest">
-        Zero Processing Fee for Early Birds
-      </p>
-    </div>
+    </aside>
   );
 }
+
+export default BookingCard;

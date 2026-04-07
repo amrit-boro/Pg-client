@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRoomdetails } from "../../../hooks/usePgdetail";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useRoomPrice } from "../../../hooks/useRoomPrice";
+import { LayoutGrid } from "lucide-react";
 
 // Add to index.html <head>:
 // <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -136,7 +137,191 @@ const BookingSidebarSkeleton = () => {
     </aside>
   );
 };
+function ImageGallery({ galleryImages = [] }) {
+  // State to track if the modal is open and which image is currently selected
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
+  if (!galleryImages || galleryImages.length === 0) return null;
+
+  // Navigation handlers
+  const openModal = (index) => setSelectedIndex(index);
+  const closeModal = () => setSelectedIndex(null);
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) =>
+      prev === galleryImages.length - 1 ? 0 : prev + 1,
+    );
+  };
+
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setSelectedIndex((prev) =>
+      prev === 0 ? galleryImages.length - 1 : prev - 1,
+    );
+  };
+
+  return (
+    <div className="w-full">
+      {/* --- 1. INITIAL GRID VIEW (50/50 Split Layout) --- */}
+      <div className="flex flex-col md:flex-row gap-2 h-[200px] md:h-[260px] w-full">
+        {" "}
+        {/* LEFT SIDE: BIG IMAGE (50% width) */}
+        <div
+          className="w-full md:w-1/2 h-full rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => openModal(0)}
+        >
+          <img
+            src={galleryImages[0]?.url}
+            alt="Main view"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        {/* RIGHT SIDE: 4 SMALL IMAGES (50% width, 2x2 Grid) */}
+        <div className="w-full md:w-1/2 grid grid-cols-2 grid-rows-2 gap-2 h-full">
+          {galleryImages.slice(1, 5).map((img, i) => {
+            const globalIndex = i + 1;
+            const isLastImage = i === 3 && galleryImages.length > 5;
+
+            return (
+              <div
+                key={globalIndex}
+                className="relative w-full h-full rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => openModal(globalIndex)}
+              >
+                <img
+                  src={img.url}
+                  alt={`Gallery thumbnail ${globalIndex}`}
+                  className="w-full h-full object-cover"
+                />
+
+                {/* OVERLAY FOR THE LAST IMAGE */}
+                {isLastImage && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <button className="bg-white text-sm md:text-base px-4 py-2 rounded-full font-medium text-black shadow-sm cursor-pointer hover:bg-gray-100 transition-colors">
+                      +{galleryImages.length - 5} all photos
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* --- 2. FULL SCREEN MODAL --- */}
+      {selectedIndex !== null && (
+        <div className="fixed inset-0 z-50 flex bg-black/95 text-white animate-in fade-in duration-200">
+          {/* LEFT SIDE: Large Active Image & Navigation */}
+          <div className="flex-1 relative flex items-center justify-center p-4 md:p-12">
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-6 left-6 p-2 bg-black/50 hover:bg-black/80 rounded-full transition-colors z-10 cursor-pointer"
+            >
+              <svg
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+
+            {/* Left Arrow */}
+            <button
+              onClick={prevImage}
+              className="absolute left-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors cursor-pointer"
+            >
+              <svg
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                ></path>
+              </svg>
+            </button>
+
+            {/* Main Image */}
+            <img
+              src={galleryImages[selectedIndex].url}
+              alt={`Gallery view ${selectedIndex + 1}`}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+
+            {/* Right Arrow */}
+            <button
+              onClick={nextImage}
+              className="absolute right-6 top-1/2 -translate-y-1/2 p-3 bg-white/10 hover:bg-white/20 rounded-full backdrop-blur-sm transition-colors cursor-pointer"
+            >
+              <svg
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                ></path>
+              </svg>
+            </button>
+          </div>
+
+          {/* RIGHT SIDE: Row-wise Thumbnail Grid */}
+          <div className="w-80 md:w-96 bg-zinc-900 border-l border-zinc-800 flex flex-col">
+            <div className="p-6 border-b border-zinc-800">
+              <h2 className="text-xl font-semibold">Gallery</h2>
+              <p className="text-zinc-400 text-sm mt-1">
+                {selectedIndex + 1} of {galleryImages.length} photos
+              </p>
+            </div>
+
+            {/* Scrollable Thumbnail Area */}
+            <div className="flex-1 overflow-y-auto p-4">
+              <div className="grid grid-cols-2 gap-3">
+                {galleryImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedIndex(idx)}
+                    className={`relative aspect-square rounded-lg overflow-hidden transition-all duration-200 cursor-pointer ${
+                      selectedIndex === idx
+                        ? "ring-2 ring-white ring-offset-2 ring-offset-zinc-900 opacity-100"
+                        : "opacity-50 hover:opacity-100"
+                    }`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 export default function StayEasyRoom() {
   const [searchParams] = useSearchParams();
   const nagivate = useNavigate();
@@ -186,6 +371,7 @@ export default function StayEasyRoom() {
     }));
 
   const galleryImages = roomData?.images ?? [];
+  console.log("galary: ", galleryImages);
   const video = roomData?.video?.[0]; // first item
 
   return (
@@ -292,27 +478,7 @@ export default function StayEasyRoom() {
             </div>
 
             {/* Gallery Grid */}
-            <div className="grid grid-cols-4 gap-2">
-              {galleryImages.map((img, i) => (
-                <div
-                  key={i}
-                  className="aspect-square bg-slate-200 rounded-xl overflow-hidden cursor-pointer hover:ring-2 ring-[#1f1fe0] transition-all relative"
-                >
-                  <div
-                    className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url("${img.url}")` }}
-                  />
-                  {img.overlay && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {img.overlay}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
+            <ImageGallery galleryImages={galleryImages} />
             {/* Room Specifications */}
             <section className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-5">
               <div>

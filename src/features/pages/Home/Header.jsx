@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { useGetUser } from "../../../hooks/useUser";
 
 function Header() {
   // const { data: user, isLoggedIn, error } = useGetUser();

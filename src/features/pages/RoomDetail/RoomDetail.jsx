@@ -8,6 +8,13 @@ import {
 } from "../../../hooks/usePgdetail";
 import BookingCard from "./BookingCard";
 import { SearchOverlay } from "../RoomList/SearchOverlay";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Share2,
+} from "lucide-react";
 
 const PRIMARY = "#1f1fe0";
 
@@ -51,6 +58,153 @@ function Description({ text }) {
   );
 }
 
+const GRID_LAYOUTS = [
+  { colSpan: "col-span-2", rowSpan: "row-span-2", hover: true }, // large left
+  { colSpan: "col-span-1", rowSpan: "row-span-1" }, // top-right small
+  { colSpan: "col-span-1", rowSpan: "row-span-1" }, // mid-right small
+  { colSpan: "col-span-2", rowSpan: "row-span-1" }, // bottom-right wide
+];
+function PhotoGrid({ photos = [] }) {
+  const [showModal, setShowModal] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const prev = () =>
+    setActiveIndex((i) => (i - 1 + photos.length) % photos.length);
+  const next = () => setActiveIndex((i) => (i + 1) % photos.length);
+
+  // keyboard nav
+  const handleKey = (e) => {
+    if (e.key === "ArrowLeft") prev();
+    if (e.key === "ArrowRight") next();
+    if (e.key === "Escape") setShowModal(false);
+  };
+
+  return (
+    <>
+      {/* Grid */}
+      <section className="relative grid grid-cols-4 grid-rows-2 gap-2 h-64 mb-6 max-w-5xl mx-auto">
+        {GRID_LAYOUTS.map((layout, i) => {
+          const photo = photos[i];
+          return (
+            <div
+              key={i}
+              className={`${layout.colSpan} ${layout.rowSpan} rounded-2xl overflow-hidden bg-slate-200 ${layout.hover ? "relative group" : ""}`}
+            >
+              <div
+                className={`w-full h-full bg-cover bg-center ${layout.hover ? "absolute inset-0 transition-transform duration-700 group-hover:scale-105" : ""}`}
+                style={{ backgroundImage: `url('${photo?.url || ""}')` }}
+              />
+            </div>
+          );
+        })}
+
+        <button
+          onClick={() => {
+            setActiveIndex(0);
+            setShowModal(true);
+          }}
+          className="absolute bottom-3 right-3 flex items-center gap-2 bg-white text-black text-sm font-medium px-4 py-2 rounded-lg border border-gray-300 shadow-sm hover:bg-gray-100 transition"
+        >
+          <LayoutGrid size={15} />
+          Show all photos
+        </button>
+      </section>
+
+      {/* Dark Lightbox Modal */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 bg-[#111] flex flex-col outline-none"
+          tabIndex={-1}
+          onKeyDown={handleKey}
+          ref={(el) => el?.focus()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 shrink-0">
+            <button
+              onClick={() => setShowModal(false)}
+              className="flex items-center gap-2 text-white text-sm bg-white/10 hover:bg-white/20 transition px-3 py-1.5 rounded-lg"
+            >
+              <ArrowLeft size={14} />
+              Back
+            </button>
+            <span className="text-white/50 text-sm">
+              {activeIndex + 1} / {photos.length} photos
+            </span>
+          </div>
+
+          {/* Body */}
+          <div className="flex flex-1 overflow-hidden p-4 gap-3 min-h-0">
+            {/* Main photo + arrows */}
+            <div className="relative flex-1 rounded-xl overflow-hidden bg-white/5 flex items-center justify-center">
+              <img
+                src={photos[activeIndex]?.url}
+                alt=""
+                className="max-w-full max-h-full object-contain"
+              />
+
+              {/* Prev */}
+              <button
+                onClick={prev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              {/* Next */}
+              <button
+                onClick={next}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition"
+              >
+                <ChevronRight size={20} />
+              </button>
+
+              {/* Dots */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {photos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIndex(i)}
+                    className={`h-1.5 rounded-full ${
+                      i === activeIndex ? "w-5 bg-white" : "w-1.5 bg-white/40"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Thumbnail strip */}
+            <div className="w-28 flex flex-col gap-2 overflow-y-auto scrollbar-none">
+              {photos.map((photo, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`shrink-0 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    i === activeIndex
+                      ? "border-white opacity-100"
+                      : "border-transparent opacity-50 hover:opacity-80"
+                  }`}
+                >
+                  <div
+                    className="w-full h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url('${photo.url}')` }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Caption (optional) */}
+          {photos[activeIndex]?.caption && (
+            <div className="px-6 py-3 text-white/60 text-sm text-center border-t border-white/10 shrink-0">
+              {photos[activeIndex].caption}
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function UrbanSanctuary() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -62,6 +216,7 @@ export default function UrbanSanctuary() {
   const pgId = searchParams.get("pgId");
   const type = searchParams.get("type") ?? "single";
   const selectedRoom = searchParams.get("roomId") ?? null;
+  console.log("select RoomId: ", selectedRoom);
 
   // ✅ Fix 1: handleType is the only place that sets type params
   const handleType = (selectedType) => {
@@ -126,6 +281,8 @@ export default function UrbanSanctuary() {
       return acc;
     }, {}) || {};
 
+  console.log("rooms; ", rooms);
+
   const totalPages = 12;
   const pageNumbers = [1, 2, 3];
 
@@ -135,6 +292,12 @@ export default function UrbanSanctuary() {
   const handleCurrentPage = (n) => setCurrentPage(n);
 
   const handleSearchSelect = () => setIsFiltered(true);
+
+  const bookingDetails = [
+    { icon: "payments", label: "Security Deposit", value: "₹36,000" },
+    { icon: "calendar_today", label: "Available From", value: "Oct 1st, 2023" },
+    { icon: "history", label: "Minimum Stay", value: "3 Months" },
+  ];
 
   return (
     <div
@@ -222,34 +385,28 @@ export default function UrbanSanctuary() {
         </div>
 
         {/* Photo Grid */}
+        {/* 
         <section className="grid grid-cols-4 grid-rows-2 gap-2 h-64 mb-6 max-w-5xl mx-auto">
-          <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden bg-slate-200 relative group">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url('${photos[0]?.url || ""}')` }}
-            />
-          </div>
-          {photos.slice(1, 3).map((photo, i) => (
-            <div
-              key={i}
-              className="col-span-1 row-span-1 rounded-2xl overflow-hidden bg-slate-200"
-            >
+          {GRID_LAYOUTS.map((layout, i) => {
+            const photo = photos[i];
+            return (
               <div
-                className="w-full h-full bg-cover bg-center"
-                style={{ backgroundImage: `url('${photo.url}')` }}
-              />
-            </div>
-          ))}
-          <div className="col-span-2 row-span-1 rounded-2xl overflow-hidden bg-slate-200">
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{ backgroundImage: `url('${photos[2]?.url || ""}')` }}
-            />
-          </div>
-        </section>
+                key={i}
+                className={`${layout.colSpan} ${layout.rowSpan} rounded-2xl overflow-hidden bg-slate-200 ${layout.hover ? "relative group" : ""}`}
+              >
+                <div
+                  className={`w-full h-full bg-cover bg-center ${layout.hover ? "absolute inset-0 transition-transform duration-700 group-hover:scale-105" : ""}`}
+                  style={{ backgroundImage: `url('${photo?.url || ""}')` }}
+                />
+              </div>
+            );
+          })}
+        </section> */}
+        <PhotoGrid photos={photos} />
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 ">
+          {" "}
           {/* Left Column */}
           <div className="lg:col-span-8 space-y-6">
             {/* Title & Description */}
@@ -468,66 +625,9 @@ export default function UrbanSanctuary() {
               </div>
             </div>
           </div>
-
           {/* Sidebar */}
-          <aside className="lg:col-span-4 relative self-start">
-            <div className="sticky top-14 space-y-3">
-              <BookingCard selectedRoom={selectedRoom} />
-
-              <div
-                className="rounded-2xl p-4 flex items-center gap-3"
-                style={{
-                  backgroundColor: "rgba(31,31,224,0.05)",
-                  border: "1px solid rgba(31,31,224,0.1)",
-                }}
-              >
-                <div
-                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    backgroundColor: "rgba(31,31,224,0.1)",
-                    color: PRIMARY,
-                  }}
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    support_agent
-                  </span>
-                </div>
-                <div>
-                  <p className="text-xs font-bold">Have questions?</p>
-                  <button
-                    className="text-xs font-bold hover:underline"
-                    style={{ color: PRIMARY }}
-                  >
-                    Chat with House Manager
-                  </button>
-                </div>
-              </div>
-
-              <div className="h-28 rounded-2xl overflow-hidden border border-slate-200 group relative cursor-pointer">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10" />
-                <div
-                  className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700"
-                  style={{
-                    backgroundImage:
-                      "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBxtVDFePDQoUgjU2K8alU9RnbE3imtsDkHCehhs9CEmjZ95CoG80lgFYXp6szoop_TxsMEnMnN1PnTJdewVNw5WKbhpkAXa-vXO5nBZS-ybjlr9RggjxT46lRfpZaGo4GFN8NxDMkmHPpAYZqtZGb28LixUNmqfUx_d76_hetEbWfTU-u2BTc3ZzMfh5HDxXaRnRzTSn00mrtxYtpqfkdDN-nLYrh8trb3Lg4AzAGU3SmrkyNUrotEK_LdnZRHnI2-uecrBrn5Mak')",
-                  }}
-                />
-                <div className="absolute bottom-2.5 left-3 z-20 bg-white px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                  <span
-                    className="material-symbols-outlined text-xs"
-                    style={{ color: PRIMARY }}
-                  >
-                    map
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-900 uppercase">
-                    View Surroundings
-                  </span>
-                </div>
-              </div>
-            </div>
-          </aside>
+          <BookingCard selectedRoom={selectedRoom} />
         </div>
-
         {/* Pagination */}
         <div className="mt-8 flex items-center justify-center gap-1.5">
           <button
@@ -593,7 +693,7 @@ export default function UrbanSanctuary() {
         </div>
 
         {/* Amenities */}
-        <section className="mt-10 py-6 border-t border-slate-200">
+        {/* <section className="mt-10 py-6 border-t border-slate-200">
           <h3 className="text-sm font-bold mb-5">Building Amenities</h3>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {amenities.map((amenity) => (
@@ -612,7 +712,7 @@ export default function UrbanSanctuary() {
               </div>
             ))}
           </div>
-        </section>
+        </section> */}
       </main>
 
       {/* Footer */}

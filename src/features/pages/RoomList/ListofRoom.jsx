@@ -8,6 +8,8 @@ import {
 import { useFilteredPg } from "../../../hooks/usePgdetail";
 import { SearchOverlay } from "./SearchOverlay";
 import { useSaveListing } from "../../../hooks/useSaveListing";
+import Header from "../Home/Header";
+import AllHeader from "../../Header/Header";
 
 function StarIcon({ className = "" }) {
   return (
@@ -290,70 +292,8 @@ export default function StayPG() {
   return (
     <div className="min-h-screen bg-[#f6f6f8] text-slate-900 font-sans antialiased">
       {/* ── Header ── */}
-      <SearchOverlay
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        onSelect={handleSearchSelect}
-        navigate={navigate}
-      />
-      <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-3 sm:px-5 h-11 flex items-center justify-between">
-          {/* Logo + Nav */}
-          <div className="flex items-center gap-5">
-            <div className="flex items-center gap-1" style={{ color: PRIMARY }}>
-              <span className="material-symbols-outlined text-lg font-bold">
-                domain
-              </span>
-              <h1
-                onClick={() => navigate("/")}
-                className="text-xs cursor-pointer font-extrabold tracking-tight"
-              >
-                StayEasy PG
-              </h1>
-            </div>
-            <nav className="hidden md:flex items-center gap-4">
-              {["Properties", "How it works", "Community", "Support"].map(
-                (item) => (
-                  <a
-                    key={item}
-                    href="#"
-                    className="text-[11px] font-semibold hover:text-blue-700 transition-colors"
-                  >
-                    {item}
-                  </a>
-                ),
-              )}
-            </nav>
-          </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1.5">
-            <button
-              className="p-1 rounded-full hover:bg-slate-100 transition-colors"
-              onClick={() => setSearchOpen(true)} // 👈 just add this
-            >
-              <span className="material-symbols-outlined text-base">
-                search
-              </span>
-            </button>
-            <button
-              className="px-3 py-1 text-white text-[11px] font-bold rounded-full transition-transform hover:scale-105"
-              style={{
-                backgroundColor: PRIMARY,
-                boxShadow: "0 3px 10px rgba(31,31,224,0.2)",
-              }}
-            >
-              Sign In
-            </button>
-            <div
-              className="w-7 h-7 rounded-full bg-cover bg-center ring-2 ring-slate-100"
-              style={{
-                backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuAHxhdmLkd8w-sh901_qSLkGXBagFqG1MW3k4PLzh4kJFCHX-0_AErGcjqLVK8JhVHDmIW1yy0upnCIn3Q8r3nla4KL_3b9bnav5lHzo4zMKZtqrXWVjkKlCOubd4xe6tpqHIuOUrovY0YRai2cpm__eW_b0bym5bUmykincr8fzq59mQ_nYHhmgH_3vecflQOkITd8ddi6QSXy2nWNM8XpO7aA_NoOu0DUGVYJw6bmCfemgTaL_2goTLyrNHBlbUoC9fwgXzkml5Q")`,
-              }}
-            />
-          </div>
-        </div>
-      </header>
+      <AllHeader />
 
       <main className="max-w-7xl mx-auto w-full px-3 sm:px-5 lg:px-10 py-4 sm:py-6">
         {/* Breadcrumbs */}

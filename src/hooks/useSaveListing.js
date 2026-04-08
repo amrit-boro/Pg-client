@@ -1,5 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+// ===========================
+// SAVE LISTING
+// ===========================
 const saveListing = async (listingId) => {
   const res = await fetch(
     `${import.meta.env.VITE_API_URL}/api/v1/listings/saved-listings`,
@@ -49,3 +52,7 @@ export function useSaveListing(pgId) {
     isPending: isSaving || isRemoving,
   };
 }
+
+// ==============================
+// SAVE ROOM
+// ==============================

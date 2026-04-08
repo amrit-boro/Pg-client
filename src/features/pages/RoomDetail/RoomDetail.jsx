@@ -10,12 +10,14 @@ import BookingCard from "./BookingCard";
 import { SearchOverlay } from "../RoomList/SearchOverlay";
 import {
   ArrowLeft,
+  Bookmark,
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
   Share2,
 } from "lucide-react";
 import { useSaveListing } from "../../../hooks/useSaveListing";
+import { useSaveRoom } from "../../../hooks/useSaveRoom";
 
 const PRIMARY = "#1f1fe0";
 
@@ -232,11 +234,11 @@ export default function UrbanSanctuary() {
   const { save, remove, isPending } = useSaveListing(pgId); // ← pass pgId
 
   const { data: roomData } = useRoomsByPg(pgId, type, currentPage);
-  console.log("==:", data?.data?.isSaved);
   // const isSaved = data?.data?.isSaved;
   const [saved, setSaved] = useState(false);
-  console.log("isSaved:", saved);
-  const handleBookmark = (e) => {
+  const [optimisticSavedMap, setOptimisticSavedMap] = useState({});
+
+  const handleBookmark = () => {
     if (saved) {
       remove(pgId, { onSuccess: () => setSaved(false) });
     } else {
@@ -246,6 +248,12 @@ export default function UrbanSanctuary() {
 
   const troom = roomData?.total;
   const { data: room } = useRooms(pgId, type);
+  const { saveRoom, removeRoom, isRoomPending } = useSaveRoom(
+    pgId,
+    type,
+    currentPage,
+  );
+
   const newocc = room?.result;
 
   const rooms = roomData?.data?.rooms?.map((r) => {
@@ -284,6 +292,15 @@ export default function UrbanSanctuary() {
       setSaved(data.data.isSaved);
     }
   }, [data]);
+  useEffect(() => {
+    if (roomData?.data?.rooms?.length) {
+      const map = {};
+      roomData.data.rooms.forEach((r) => {
+        map[r.room_id] = r.isSaved ?? false;
+      });
+      setOptimisticSavedMap(map);
+    }
+  }, [roomData]);
 
   // ✅ Fix 1: Removed the duplicate useEffect that was re-setting searchParams on type change
 
@@ -627,6 +644,7 @@ export default function UrbanSanctuary() {
                               })}
                             </div>
                           </div>
+
                           <div className="flex items-center justify-between">
                             <div className="flex items-baseline gap-1">
                               <span
@@ -641,15 +659,60 @@ export default function UrbanSanctuary() {
                                 / mo
                               </span>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/roomdetail?id=${room.id}`);
-                              }}
-                              className="px-3 py-1 bg-slate-900 text-white cursor-pointer rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              Details
-                            </button>
+
+                            <div className="flex items-center gap-2">
+                              {/* Bookmark button — always visible */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const isSaved = optimisticSavedMap[room.id];
+                                  setOptimisticSavedMap((prev) => ({
+                                    ...prev,
+                                    [room.id]: !isSaved,
+                                  }));
+                                  isSaved
+                                    ? removeRoom({
+                                        roomId: room.id,
+                                        listingId: pgId,
+                                      })
+                                    : saveRoom({
+                                        roomId: room.id,
+                                        listingId: pgId,
+                                      });
+                                }}
+                                disabled={isRoomPending}
+                                className="p-1 rounded-full transition-colors hover:bg-slate-100 disabled:opacity-40"
+                                aria-label={
+                                  optimisticSavedMap[room.id]
+                                    ? "Unsave room"
+                                    : "Save room"
+                                }
+                              >
+                                <Bookmark
+                                  size={15}
+                                  style={{
+                                    fill: optimisticSavedMap[room.id]
+                                      ? PRIMARY
+                                      : "transparent",
+                                    stroke: optimisticSavedMap[room.id]
+                                      ? PRIMARY
+                                      : "#94a3b8",
+                                    strokeWidth: 2,
+                                  }}
+                                />
+                              </button>
+
+                              {/* Details button — hover only */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/roomdetail?id=${room.id}`);
+                                }}
+                                className="px-3 py-1 bg-slate-900 text-white cursor-pointer rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                Details
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

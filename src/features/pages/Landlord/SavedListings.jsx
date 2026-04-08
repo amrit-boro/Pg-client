@@ -31,13 +31,13 @@ export default function SavedItems() {
   const [statusFilter, setStatusFilter] = useState("active");
 
   // Fetch actual Listings
+
   const {
     data: listings = [],
     isLoading: isListingsLoading,
     isError: isListingsError,
     refetch: refetchListings,
   } = useSavedListings();
-
   // Fetch actual Rooms
   const {
     data: RoomData = [],
@@ -45,14 +45,16 @@ export default function SavedItems() {
     isError: isRoomsError,
     refetch: refetchRooms,
   } = useSavedRooms();
-
+  console.log("isRoomError:  ", isRoomsError);
   // Dynamically resolve data and states based on the active tab
   const currentData = activeTab === "listings" ? listings : RoomData;
+  console.log("currentDAta: ", currentData);
   const isLoading = activeTab === "listings" ? isListingsLoading : isSavedR;
   const isError = activeTab === "listings" ? isListingsError : isRoomsError;
   const refetch = activeTab === "listings" ? refetchListings : refetchRooms;
 
   const title = activeTab === "listings" ? "Saved Listings" : "Saved Rooms";
+  console.log("title: ", title);
   const itemLabel = activeTab === "listings" ? "properties" : "rooms";
 
   return (
@@ -66,7 +68,7 @@ export default function SavedItems() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
               activeTab === tab.id
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-slate-500 hover:text-blue-600 hover:bg-blue-50"

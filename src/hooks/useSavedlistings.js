@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 const fetchSavedListings = async () => {
   const res = await fetch(
     "http://localhost:8000/api/v1/listings/saved-listings",
+    {
+      method: "GET",
+    },
     // when i will be using authentication
     // {    credentials: "include", // 👈 that's it}
   );
@@ -20,7 +23,10 @@ export const useSavedListings = () =>
   });
 
 const fetchSavedRooms = async () => {
-  const res = await fetch(`http://localhost:8000/api/v1/listings/saved-rooms`);
+  const res = await fetch(`http://localhost:8000/api/v1/listings/saved-rooms`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
   if (!res.ok) throw new Error("Failed to fetch saved rooms");
   const json = await res.json();
   return json.data;

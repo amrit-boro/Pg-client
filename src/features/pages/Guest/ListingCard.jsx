@@ -1,8 +1,11 @@
+import { useNavigate } from "react-router-dom";
+
 const FALLBACK_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBtj_ll0EvahWA2ilfxtrHzindUOyrdnpmq58_4LwhMKf3Cs8vvNqZG0-nd2PvpuQ5eV3nPR7-dlwsJJV3U2Gsn31PaSSA4R8TyKtTA_Dxd2YTqLh7aiPv-Il7HUBjUsFNH5pVILQ0P9QX3gUhIITFAwXewOw6u2ldTBFzT3X-B40quD3HauV16oU0an70jiRifC5scbN6tPKQ-VxoePz__kgmcSz7dGyS80ttxBDCbpxV1Ei6Kj2BSZAa0MGew-BabqZ42hie_2es";
 
 export default function ListingCard({ listing, badge }) {
-  console.log(listing.avg_rating);
+  const navigate = useNavigate();
+  console.log(listing);
   const rawPrice = listing?.price_per_month ?? listing?.starting_price;
 
   const formattedPrice = rawPrice
@@ -66,8 +69,17 @@ export default function ListingCard({ listing, badge }) {
               <span className="text-xs font-medium text-slate-400">/mo</span>
             </p>
           </div>
-          <button className="bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors">
-            Book Now
+          <button
+            onClick={() => {
+              if (listing.room_type) {
+                navigate(`/roomdetail?id=${listing.id}`);
+              } else {
+                navigate(`/listingDetail?pgId=${listing.id}&type=single`);
+              }
+            }}
+            className="bg-blue-600 text-white px-3 py-1.5 cursor-pointer rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors"
+          >
+            View Detail
           </button>
         </div>
       </div>

@@ -26,20 +26,20 @@ const deleteListing = async (listingId) => {
   return res.json();
 };
 
-export function useSaveListing() {
+export function useSaveListing(pgId) {
   const queryClient = useQueryClient();
 
   const { mutate: save, isPending: isSaving } = useMutation({
     mutationFn: saveListing,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pgListings"] });
+      queryClient.invalidateQueries({ queryKey: ["pgListings", pgId] });
     },
   });
 
   const { mutate: remove, isPending: isRemoving } = useMutation({
     mutationFn: deleteListing,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pgListings"] });
+      queryClient.invalidateQueries({ queryKey: ["pgListings", pgId] });
     },
   });
 

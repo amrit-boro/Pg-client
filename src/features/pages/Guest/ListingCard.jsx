@@ -2,10 +2,12 @@ const FALLBACK_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBtj_ll0EvahWA2ilfxtrHzindUOyrdnpmq58_4LwhMKf3Cs8vvNqZG0-nd2PvpuQ5eV3nPR7-dlwsJJV3U2Gsn31PaSSA4R8TyKtTA_Dxd2YTqLh7aiPv-Il7HUBjUsFNH5pVILQ0P9QX3gUhIITFAwXewOw6u2ldTBFzT3X-B40quD3HauV16oU0an70jiRifC5scbN6tPKQ-VxoePz__kgmcSz7dGyS80ttxBDCbpxV1Ei6Kj2BSZAa0MGew-BabqZ42hie_2es";
 
 export default function ListingCard({ listing, badge }) {
-  const formattedPrice = listing.starting_price
-    ? `₹${Number(listing.starting_price).toLocaleString("en-IN")}`
-    : "N/A";
+  console.log(listing.avg_rating);
+  const rawPrice = listing?.price_per_month ?? listing?.starting_price;
 
+  const formattedPrice = rawPrice
+    ? `₹${Number(rawPrice).toLocaleString("en-IN")}`
+    : "N/A";
   return (
     <div className="group bg-white rounded-3xl border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/5 transition-all duration-300">
       {/* Image */}
@@ -46,7 +48,7 @@ export default function ListingCard({ listing, badge }) {
             >
               star
             </span>
-            4.8
+            {listing.avg_rating}
           </div>
         </div>
 

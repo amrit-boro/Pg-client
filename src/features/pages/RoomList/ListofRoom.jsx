@@ -239,14 +239,12 @@ function PGCard({ listing }) {
 // SEARCH
 
 export default function StayPG() {
-  const [searchOpen, setSearchOpen] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [email, setEmail] = useState("");
   const [selectedPrice, setSelectedPrice] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const filters = {
     listing_type: searchParams.get("type"),

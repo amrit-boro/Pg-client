@@ -18,3 +18,18 @@ export const useSavedListings = () =>
     queryFn: fetchSavedListings,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
+
+const fetchSavedRooms = async () => {
+  const res = await fetch(`http://localhost:8000/api/v1/listings/saved-rooms`);
+  if (!res.ok) throw new Error("Failed to fetch saved rooms");
+  const json = await res.json();
+  return json.data;
+};
+
+export const useSavedRooms = () => {
+  return useQuery({
+    queryKey: ["saved-rooms"],
+    queryFn: fetchSavedRooms,
+    staleTime: 1000 * 60 * 5,
+  });
+};

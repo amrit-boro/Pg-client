@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { useSavedListings } from "../../../hooks/useSavedlistings";
+import {
+  useSavedListings,
+  useSavedRooms,
+} from "../../../hooks/useSavedlistings";
+
 import ListingCard from "../Guest/ListingCard";
 
 const BADGES = ["Top Rated", null, "Best Seller", null];
@@ -21,27 +25,68 @@ function SkeletonCard() {
   );
 }
 
-export default function SavedListings() {
+export default function SavedItems() {
+  const [activeTab, setActiveTab] = useState("listings");
   const [view, setView] = useState("grid");
   const [statusFilter, setStatusFilter] = useState("active");
 
+  // Fetch actual Listings
   const {
     data: listings = [],
-    isLoading,
-    isError,
-    refetch,
+    isLoading: isListingsLoading,
+    isError: isListingsError,
+    refetch: refetchListings,
   } = useSavedListings();
+
+  // Fetch actual Rooms
+  const {
+    data: RoomData = [],
+    isLoading: isSavedR,
+    isError: isRoomsError,
+    refetch: refetchRooms,
+  } = useSavedRooms();
+
+  // Dynamically resolve data and states based on the active tab
+  const currentData = activeTab === "listings" ? listings : RoomData;
+  const isLoading = activeTab === "listings" ? isListingsLoading : isSavedR;
+  const isError = activeTab === "listings" ? isListingsError : isRoomsError;
+  const refetch = activeTab === "listings" ? refetchListings : refetchRooms;
+
+  const title = activeTab === "listings" ? "Saved Listings" : "Saved Rooms";
+  const itemLabel = activeTab === "listings" ? "properties" : "rooms";
 
   return (
     <section className="flex-1 min-w-0">
+      {/* Tab Switcher - Blue Styling */}
+      <div className="flex bg-slate-100 p-1 rounded-xl mb-6 w-max border border-slate-200">
+        {[
+          { id: "listings", label: "Saved Listings" },
+          { id: "rooms", label: "Saved Rooms" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              activeTab === tab.id
+                ? "bg-blue-600 text-white shadow-sm"
+                : "text-slate-500 hover:text-blue-600 hover:bg-blue-50"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Saved Listings
+            {title}
           </h1>
           <p className="text-slate-400 text-sm mt-0.5">
-            {isLoading ? "Loading..." : `${listings.length} saved properties`}
+            {isLoading
+              ? "Loading..."
+              : `${currentData.length} saved ${itemLabel}`}
           </p>
         </div>
         <div className="flex bg-white p-1 rounded-2xl border border-slate-200 self-start sm:self-auto">
@@ -90,7 +135,7 @@ export default function SavedListings() {
             wifi_off
           </span>
           <p className="text-slate-500 text-sm mb-3">
-            Failed to load listings.
+            Failed to load {itemLabel}.
           </p>
           <button
             onClick={() => refetch()}
@@ -112,21 +157,21 @@ export default function SavedListings() {
         >
           {isLoading
             ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : listings.map((listing, i) => (
+            : currentData.map((item, i) => (
                 <ListingCard
-                  key={listing.id}
-                  listing={listing}
+                  key={item.id}
+                  listing={item}
                   badge={BADGES[i % BADGES.length]}
                 />
               ))}
 
-          {!isLoading && listings.length === 0 && (
+          {!isLoading && currentData.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
               <span className="material-symbols-outlined text-5xl text-slate-300 mb-3">
                 favorite_border
               </span>
               <p className="text-slate-500 font-medium">
-                No saved listings yet.
+                No saved {itemLabel} yet.
               </p>
               <p className="text-slate-400 text-sm mt-1">
                 Start browsing and save your favorites!

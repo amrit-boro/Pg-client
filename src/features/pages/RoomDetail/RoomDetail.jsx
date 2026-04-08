@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   Share2,
 } from "lucide-react";
+import { useSaveListing } from "../../../hooks/useSaveListing";
 
 const PRIMARY = "#1f1fe0";
 
@@ -216,7 +217,6 @@ export default function UrbanSanctuary() {
   const pgId = searchParams.get("pgId");
   const type = searchParams.get("type") ?? "single";
   const selectedRoom = searchParams.get("roomId") ?? null;
-  console.log("select RoomId: ", selectedRoom);
 
   // ✅ Fix 1: handleType is the only place that sets type params
   const handleType = (selectedType) => {
@@ -229,10 +229,22 @@ export default function UrbanSanctuary() {
   };
 
   const { data, isLoading } = usePgById(pgId);
+  const { save, remove, isPending } = useSaveListing(pgId); // ← pass pgId
+
   const { data: roomData } = useRoomsByPg(pgId, type, currentPage);
+  console.log("==:", data?.data?.isSaved);
+  // const isSaved = data?.data?.isSaved;
+  const [saved, setSaved] = useState(false);
+  console.log("isSaved:", saved);
+  const handleBookmark = (e) => {
+    if (saved) {
+      remove(pgId, { onSuccess: () => setSaved(false) });
+    } else {
+      save(pgId, { onSuccess: () => setSaved(true) });
+    }
+  };
 
   const troom = roomData?.total;
-
   const { data: room } = useRooms(pgId, type);
   const newocc = room?.result;
 
@@ -267,6 +279,12 @@ export default function UrbanSanctuary() {
     }
   }, [rooms]);
 
+  useEffect(() => {
+    if (data?.data?.isSaved !== undefined) {
+      setSaved(data.data.isSaved);
+    }
+  }, [data]);
+
   // ✅ Fix 1: Removed the duplicate useEffect that was re-setting searchParams on type change
 
   const counts =
@@ -281,8 +299,6 @@ export default function UrbanSanctuary() {
       return acc;
     }, {}) || {};
 
-  console.log("rooms; ", rooms);
-
   const totalPages = 12;
   const pageNumbers = [1, 2, 3];
 
@@ -292,12 +308,6 @@ export default function UrbanSanctuary() {
   const handleCurrentPage = (n) => setCurrentPage(n);
 
   const handleSearchSelect = () => setIsFiltered(true);
-
-  const bookingDetails = [
-    { icon: "payments", label: "Security Deposit", value: "₹36,000" },
-    { icon: "calendar_today", label: "Available From", value: "Oct 1st, 2023" },
-    { icon: "history", label: "Minimum Stay", value: "3 Months" },
-  ];
 
   return (
     <div
@@ -415,19 +425,43 @@ export default function UrbanSanctuary() {
                 <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
                   {listing.title}
                 </h2>
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-sm"
-                  style={{
-                    backgroundColor: "rgba(31,31,224,0.1)",
-                    color: PRIMARY,
-                  }}
-                >
-                  <span className="material-symbols-outlined text-sm">
-                    star
-                  </span>
-                  <span className="text-xs">
-                    {listing.avg_rating} ({listing.review_count} reviews)
-                  </span>
+
+                <div className="flex items-center gap-2">
+                  {/* Bookmark Button */}
+                  <button
+                    onClick={handleBookmark}
+                    disabled={isPending || isLoading}
+                    className="flex items-center justify-center w-9 h-9 rounded-xl transition-all"
+                    style={{
+                      backgroundColor: saved ? PRIMARY : "rgba(31,31,224,0.08)",
+                    }}
+                  >
+                    <span
+                      className="material-symbols-outlined text-lg"
+                      style={{
+                        color: saved ? "#fff" : PRIMARY,
+                        fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0",
+                      }}
+                    >
+                      bookmark
+                    </span>
+                  </button>
+
+                  {/* Existing rating badge */}
+                  <div
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-sm"
+                    style={{
+                      backgroundColor: "rgba(31,31,224,0.1)",
+                      color: PRIMARY,
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-sm">
+                      star
+                    </span>
+                    <span className="text-xs">
+                      {listing.avg_rating} ({listing.review_count} reviews)
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-slate-500 text-xs">

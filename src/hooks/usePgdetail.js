@@ -65,6 +65,7 @@ export const useRoomsByPg = (pgId, type, page) => {
 };
 
 export function useRooms(pgId, type) {
+  console.log(pgId, type);
   const { data, isLoading, error } = useQuery({
     queryKey: ["rooms", pgId, type],
     queryFn: fetchRooms,

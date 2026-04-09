@@ -14,6 +14,7 @@ import StayEasyRoom from "./features/pages/RoomList/StayEasyRoom";
 import Profile from "./features/pages/Guest/Profile";
 import MyRooms from "./features/pages/Landlord/Myrooms";
 import SavedListings from "./features/pages/Landlord/SavedListings";
+import CreateRoom from "./features/pages/Guest/CreateRoom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
         ],
       },
       { path: "/guest", element: <GuestaProfile /> },
+      { path: "/createRoom", element: <CreateRoom /> },
       // { path: "/c", element: <LandlordProfile /> },
       { path: "/listingDetail", element: <RoomDetail /> },
       { path: "/roomdetail", element: <StayEasyRoom /> },

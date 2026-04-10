@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useSaveListing } from "../../../hooks/useSaveListing";
 import { useSaveRoom } from "../../../hooks/useSaveRoom";
+import ReviewsSection from "./ReviewsSection";
 
 const PRIMARY = "#1f1fe0";
 
@@ -248,6 +249,7 @@ export default function UrbanSanctuary() {
 
   const troom = roomData?.total;
   const { data: room } = useRooms(pgId, type);
+  console.log("data: ", data);
   const { saveRoom, removeRoom, isRoomPending } = useSaveRoom(
     pgId,
     type,
@@ -320,6 +322,7 @@ export default function UrbanSanctuary() {
   const pageNumbers = [1, 2, 3];
 
   const listing = data?.data || [];
+  console.log("listing: ", listing.id);
   const photos = data?.data?.photos || [];
 
   const handleCurrentPage = (n) => setCurrentPage(n);
@@ -788,6 +791,8 @@ export default function UrbanSanctuary() {
             </svg>
           </button>
         </div>
+
+        <ReviewsSection listingId={listing.id} />
 
         {/* Amenities */}
         {/* <section className="mt-10 py-6 border-t border-slate-200">

@@ -8,7 +8,7 @@ const LISTING_ID = "dc5c1ef5-6302-4181-83c4-2aa2a9cfd822";
 const ROOM_TYPES = [
   { value: "single", label: "Single", icon: "person" },
   { value: "double", label: "Double", icon: "group" },
-  { value: "triple", label: "Triple", icon: "groups" },
+  { value: "tripple", label: "Triple", icon: "groups" },
 ];
 
 function SkeletonCard() {

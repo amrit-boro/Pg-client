@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { useRoomdetails } from "../../../hooks/usePgdetail";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useRoomPrice } from "../../../hooks/useRoomPrice";
 import { LayoutGrid } from "lucide-react";
 
@@ -325,8 +331,14 @@ function ImageGallery({ galleryImages = [] }) {
 export default function StayEasyRoom() {
   const [searchParams] = useSearchParams();
   const nagivate = useNavigate();
+  const location = useLocation();
+  const title = location.state?.title; // safe access
+  const listing_id = location.state?.pgId;
+  console.log("title: ", title);
+  console.log("listing_id", listing_id);
   const id = searchParams.get("id");
   const { data, isLoading } = useRoomdetails(id);
+  const navigate = useNavigate();
   const { data: price, isLoading: priceLoading, isError } = useRoomPrice(id);
 
   if (priceLoading) {
@@ -443,9 +455,19 @@ export default function StayEasyRoom() {
           <span className="material-symbols-outlined text-slate-400 text-xs">
             chevron_right
           </span>
-          <a className="text-slate-500 hover:underline" href="#">
-            Bangalore Hostels
-          </a>
+          <button
+            onClick={() =>
+              navigate(
+                `/listingDetail?pgId=${listing_id}&type=single&roomId=${id}`,
+                {
+                  state: { title },
+                },
+              )
+            }
+            className="text-slate-500 hover:underline"
+          >
+            {title}
+          </button>
           <span className="material-symbols-outlined text-slate-400 text-xs">
             chevron_right
           </span>

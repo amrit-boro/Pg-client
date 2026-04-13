@@ -5,7 +5,9 @@ const FALLBACK_IMAGE =
 
 export default function ListingCard({ listing, badge }) {
   const navigate = useNavigate();
-  console.log(listing);
+  const title = listing.ltitle;
+  const lid = listing.listing_id;
+  console.log("listing_id: ", listing.listing_id);
   const rawPrice = listing?.price_per_month ?? listing?.starting_price;
 
   const formattedPrice = rawPrice
@@ -72,9 +74,13 @@ export default function ListingCard({ listing, badge }) {
           <button
             onClick={() => {
               if (listing.room_type) {
-                navigate(`/roomdetail?id=${listing.id}`);
+                navigate(`/roomdetail?id=${listing.id}`, {
+                  state: { title: title, pgId: lid },
+                });
               } else {
-                navigate(`/listingDetail?pgId=${listing.id}&type=single`);
+                navigate(`/listingDetail?pgId=${listing.id}&type=single`, {
+                  state: { title: title },
+                });
               }
             }}
             className="bg-blue-600 text-white px-3 py-1.5 cursor-pointer rounded-xl text-xs font-bold hover:bg-indigo-600 transition-colors"

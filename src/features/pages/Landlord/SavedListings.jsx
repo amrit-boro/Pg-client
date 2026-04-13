@@ -46,6 +46,7 @@ export default function SavedItems() {
     refetch: refetchRooms,
   } = useSavedRooms();
   console.log("isRoomError:  ", isRoomsError);
+  console.log("RoomData: ", RoomData);
   // Dynamically resolve data and states based on the active tab
   const currentData = activeTab === "listings" ? listings : RoomData;
   console.log("currentDAta: ", currentData);

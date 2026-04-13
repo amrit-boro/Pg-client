@@ -220,6 +220,7 @@ export default function UrbanSanctuary() {
   const pgId = searchParams.get("pgId");
   const type = searchParams.get("type") ?? "single";
   const selectedRoom = searchParams.get("roomId") ?? null;
+  console.log("roomId", selectedRoom);
 
   // ✅ Fix 1: handleType is the only place that sets type params
   const handleType = (selectedType) => {
@@ -228,7 +229,7 @@ export default function UrbanSanctuary() {
 
   // ✅ Fix 2: use replace:true so room clicks don't pollute history
   const setSelectedRoom = (id) => {
-    setSearchParams({ pgId, type, roomId: id }, { replace: true });
+    setSearchParams({ pgId, type, roomId: id });
   };
 
   const { data, isLoading } = usePgById(pgId);
@@ -708,8 +709,11 @@ export default function UrbanSanctuary() {
                               {/* Details button — hover only */}
                               <button
                                 onClick={(e) => {
+                                  console.log(listing.title);
                                   e.stopPropagation();
-                                  navigate(`/roomdetail?id=${room.id}`);
+                                  navigate(`/roomdetail?id=${room.id}`, {
+                                    state: { title: listing.title, pgId: pgId },
+                                  });
                                 }}
                                 className="px-3 py-1 bg-slate-900 text-white cursor-pointer rounded-full text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity"
                               >

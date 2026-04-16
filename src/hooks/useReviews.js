@@ -4,7 +4,7 @@ const LIMIT = 4;
 
 const fetchReviews = async ({ listingId, pageParam = 0 }) => {
   const res = await fetch(
-    `http://localhost:8000/api/v1/reviews/listing/${listingId}?limit=${LIMIT}&offset=${pageParam}`,
+    `${import.meta.env.VITE_API_URL}/api/v1/reviews/listing/${listingId}?limit=${LIMIT}&offset=${pageParam}`,
   );
   if (!res.ok) throw new Error("Failed to fetch reviews");
   const json = await res.json();

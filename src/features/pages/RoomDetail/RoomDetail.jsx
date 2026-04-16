@@ -68,6 +68,7 @@ const GRID_LAYOUTS = [
   { colSpan: "col-span-1", rowSpan: "row-span-1" }, // mid-right small
   { colSpan: "col-span-2", rowSpan: "row-span-1" }, // bottom-right wide
 ];
+
 function PhotoGrid({ photos = [] }) {
   const [showModal, setShowModal] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -598,7 +599,12 @@ export default function UrbanSanctuary() {
                     return (
                       <div
                         key={room.id}
-                        onClick={() => setSelectedRoom(room.id)}
+                        onClick={() => {
+                          setSelectedRoom(room.id);
+                          navigate(`/roomdetail?id=${room.id}`, {
+                            state: { title: listing.title, pgId: pgId },
+                          });
+                        }}
                         className="group relative bg-white rounded-2xl p-3 flex gap-4 cursor-pointer transition-all"
                         style={{
                           border: isSelected
@@ -609,12 +615,19 @@ export default function UrbanSanctuary() {
                             : "none",
                         }}
                       >
+                        {/* Image */}
                         <div className="w-32 h-24 rounded-xl overflow-hidden flex-shrink-0 relative">
                           <div
-                            className={`w-full h-full bg-cover bg-center transition-all duration-500 ${!isSelected ? "grayscale group-hover:grayscale-0" : ""}`}
+                            className={`w-full h-full bg-cover bg-center transition-all duration-500 ${
+                              !isSelected
+                                ? "grayscale group-hover:grayscale-0"
+                                : ""
+                            }`}
                             style={{ backgroundImage: `url('${room.img}')` }}
                           />
                         </div>
+
+                        {/* Content */}
                         <div className="flex-1 flex flex-col justify-between py-0.5">
                           <div>
                             <div className="flex justify-between items-start mb-1.5">
@@ -627,6 +640,8 @@ export default function UrbanSanctuary() {
                                 {room.status}
                               </span>
                             </div>
+
+                            {/* Tags */}
                             <div className="flex flex-wrap gap-1.5 mb-2">
                               {room.tags.map((tag, index) => {
                                 const isBed = tag.icon === "bed";
@@ -649,6 +664,7 @@ export default function UrbanSanctuary() {
                             </div>
                           </div>
 
+                          {/* Bottom row */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-baseline gap-1">
                               <span
@@ -665,15 +681,18 @@ export default function UrbanSanctuary() {
                             </div>
 
                             <div className="flex items-center gap-2">
-                              {/* Bookmark button — always visible */}
+                              {/* Bookmark button (safe click) */}
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+
                                   const isSaved = optimisticSavedMap[room.id];
+
                                   setOptimisticSavedMap((prev) => ({
                                     ...prev,
                                     [room.id]: !isSaved,
                                   }));
+
                                   isSaved
                                     ? removeRoom({
                                         roomId: room.id,
@@ -706,7 +725,7 @@ export default function UrbanSanctuary() {
                                 />
                               </button>
 
-                              {/* Details button — hover only */}
+                              {/* Details button (optional UI only) */}
                               <button
                                 onClick={(e) => {
                                   console.log(listing.title);

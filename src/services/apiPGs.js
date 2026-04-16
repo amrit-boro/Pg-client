@@ -51,9 +51,12 @@ export async function getPgdetailById(id) {
 
 export async function getPgDetail() {
   try {
-    const res = await axios.get("http://localhost:8000/api/v1/pg/getSinglePg", {
-      withCredentials: true,
-    });
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/v1/pg/getSinglePg`,
+      {
+        withCredentials: true,
+      },
+    );
     console.log("result: ", res);
     console.log("resutl typ: ", typeof res);
     return res;
@@ -66,7 +69,7 @@ export async function getPgDetail() {
 export async function getdetailById(id) {
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/v1/listings/room/${id}`,
+      `${import.meta.env.VITE_API_URL}/api/v1/listings/room/${id}`,
     );
     if (!res.data) {
       throw new Error("Invalid response from server");
@@ -96,7 +99,7 @@ export async function getdetailById(id) {
 export async function createPg(formData) {
   try {
     const res = await axios.post(
-      "http://localhost:8000/api/v1/pg/pgCreate",
+      `${import.meta.env.VITE_API_URL}/api/v1/pg/pgCreate`,
       formData, // 2nd Argument: The Data
       {
         // 3rd Argument: The Configuration (Headers + Credentials)
@@ -118,7 +121,7 @@ export async function fetchRooms({ queryKey }) {
   const [, pgId, type] = queryKey;
 
   const res = await fetch(
-    `http://localhost:8000/api/v1/listings/total/${pgId}`,
+    `${import.meta.env.VITE_API_URL}/api/v1/listings/total/${pgId}`,
   );
 
   if (!res.ok) throw new Error("Failed to fetch rooms");

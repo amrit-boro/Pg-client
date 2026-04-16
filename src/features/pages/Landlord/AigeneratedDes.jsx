@@ -68,12 +68,12 @@ const DescriptionGenerator = () => {
       };
 
       const response = await fetch(
-        "http://localhost:8000/api/v1/ai/generate-description",
+        `${import.meta.env.VITE_API_URL}/v1/ai/generate-description`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await response.json();

@@ -65,7 +65,7 @@ function EmptyState({ type }) {
 export default function MyRooms() {
   const [activeType, setActiveType] = useState("single");
   const [page, setPage] = useState(1);
-  const [showCreateRoom, setShowCreateRoom] = useState(false); // ← controls drawer
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
 
   const { data, isLoading, isError, refetch } = useRooms({
     listingId: LISTING_ID,
@@ -96,7 +96,6 @@ export default function MyRooms() {
                 : `${total} ${activeType} room${total !== 1 ? "s" : ""} listed`}
             </p>
           </div>
-          {/* Add Room → opens portal drawer */}
           <button
             onClick={() => setShowCreateRoom(true)}
             className="flex items-center gap-1.5 self-start sm:self-auto bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-200"
@@ -183,11 +182,6 @@ export default function MyRooms() {
         )}
       </div>
 
-      {/*
-        CreateRoom portal drawer — rendered directly into document.body via
-        ReactDOM.createPortal, so it overlays the full screen regardless of
-        any parent transform / overflow / stacking context.
-      */}
       <CreateRoom
         open={showCreateRoom}
         onClose={() => setShowCreateRoom(false)}

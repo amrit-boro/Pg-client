@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchRoomPrice = async (roomId) => {
   const res = await fetch(
-    `http://localhost:8000/api/v1/price/roomPrice/${roomId}`,
+    `${import.meta.env.VITE_API_URL}/api/v1/price/roomPrice/${roomId}`,
   );
   if (!res.ok) throw new Error("Failed to fetch price");
   const json = await res.json();

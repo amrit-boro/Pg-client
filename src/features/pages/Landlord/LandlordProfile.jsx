@@ -94,7 +94,7 @@ export default function LandlordProfile() {
       // NOTE: Replace 'http://localhost:YOUR_PORT' with your actual backend URL
       image:
         item.images && item.images.length > 0
-          ? `http://localhost:8000/${item.images[0]}`
+          ? `${import.meta.env.VITE_API_URL}/${item.images[0]}`
           : "https://via.placeholder.com/400",
     }));
   }, [pgdetail]);

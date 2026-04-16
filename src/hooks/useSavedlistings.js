@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 // Saved Listings
 const fetchSavedListings = async () => {
   const res = await fetch(
-    "http://localhost:8000/api/v1/listings/saved-listings",
+    `${import.meta.env.VITE_API_URL}/api/v1/listings/saved-listings`,
     {
       method: "GET",
     },
@@ -23,10 +23,13 @@ export const useSavedListings = () =>
   });
 
 const fetchSavedRooms = async () => {
-  const res = await fetch(`http://localhost:8000/api/v1/listings/saved-rooms`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/v1/listings/saved-rooms`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    },
+  );
   if (!res.ok) throw new Error("Failed to fetch saved rooms");
   const json = await res.json();
   return json.data;

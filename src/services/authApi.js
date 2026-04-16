@@ -9,11 +9,11 @@ export const signup = async ({
   console.log({ full_name, phone_number, email, password });
   try {
     const res = await axios.post(
-      "http://localhost:8000/api/v1/signup",
+      `${import.meta.env.VITE_API_URL}/api/v1/signup`,
       { full_name, phone_number, email, password },
       {
         withCredentials: true,
-      }
+      },
     );
 
     return res.data;
@@ -27,12 +27,12 @@ export const login = async ({ email, password }) => {
   console.log(email, password);
   try {
     const res = await axios.post(
-      `http://localhost:8000/api/v1/login`,
+      `${import.meta.env.VITE_API_URL}/api/v1/login`,
       {
         email,
         password,
       },
-      { withCredentials: true }
+      { withCredentials: true },
     );
     return res;
   } catch (err) {
@@ -43,9 +43,12 @@ export const login = async ({ email, password }) => {
 
 export const getUser = async () => {
   try {
-    const res = await axios.get("http://localhost:8000/api/v1/user/getuser", {
-      withCredentials: true,
-    });
+    const res = await axios.get(
+      "${import.meta.env.VITE_API_URL}/api/v1/user/getuser",
+      {
+        withCredentials: true,
+      },
+    );
     return res;
   } catch (err) {
     console.log(err.response);

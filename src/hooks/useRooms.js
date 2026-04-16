@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 // Rooms
 const fetchRooms = async ({ listingId, type = "single", page = 1 }) => {
   const res = await fetch(
-    `http://localhost:8000/api/v1/listings/${listingId}/rooms?type=${type}&page=${page}`,
+    `${import.meta.env.VITE_API_URL}/api/v1/listings/${listingId}/rooms?type=${type}&page=${page}`,
     // { credentials: "include" },
   );
   if (!res.ok) throw new Error("Failed to fetch rooms");

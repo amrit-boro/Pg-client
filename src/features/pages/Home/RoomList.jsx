@@ -4,7 +4,6 @@ import { useGetAllPg } from "../../../hooks/usePgdetail";
 
 function RoomList() {
   const { data: pgdetails, isLoading, error } = useGetAllPg();
-  const navigate = useNavigate();
 
   const pgDetails = pgdetails?.data?.data || [];
 

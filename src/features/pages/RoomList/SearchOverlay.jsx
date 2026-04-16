@@ -67,7 +67,7 @@ export function SearchOverlay({ open, onClose, onSelect, navigate }) {
 
       try {
         const res = await fetch(
-          `http://localhost:8000/api/v1/listings/search?q=${encodeURIComponent(q)}`,
+          `${import.meta.env.VITE_API_URL}/api/v1/listings/search?q=${encodeURIComponent(q)}`,
         );
         console.log("URL:", res);
 

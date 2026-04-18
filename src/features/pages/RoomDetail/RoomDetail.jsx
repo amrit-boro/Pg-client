@@ -268,7 +268,7 @@ export default function UrbanSanctuary() {
 
     return {
       id: r.room_id,
-      name: `Room ${r.room_no}`,
+      name: `Room ${r.room_number}`,
       status: r.status === "available" ? "available" : "Unavailable",
       statusColor:
         r.status === "available"

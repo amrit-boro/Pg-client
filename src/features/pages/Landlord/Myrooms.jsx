@@ -74,6 +74,7 @@ export default function MyRooms() {
   });
 
   const rooms = data?.data?.rooms || [];
+  console.log("rooms: ", rooms);
   const total = data?.total ?? 0;
 
   const handleTypeChange = (type) => {

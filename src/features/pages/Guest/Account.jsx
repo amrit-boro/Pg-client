@@ -22,8 +22,9 @@ const mobileNav = [
 ];
 function SidebarLink({ icon, label, to }) {
   const { pathname } = useLocation(); // 👈 import useLocation from react-router-dom
+  console.log("pathname: ", pathname);
 
-  const isIndexActive = to === "/account/saved" && pathname === "/account";
+  const isIndexActive = to === "/account/rooms" && pathname === "/account";
 
   return (
     <NavLink
@@ -54,7 +55,7 @@ function SidebarLink({ icon, label, to }) {
     </NavLink>
   );
 }
-export default function Profile() {
+export default function Account() {
   return (
     <div className="relative flex min-h-screen flex-col bg-slate-100">
       {/* Header */}

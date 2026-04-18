@@ -1,3 +1,6 @@
+import { useState } from "react";
+import EditRoomModal from "./EditRoomModal";
+
 const STATUS_STYLES = {
   available: "bg-emerald-50 text-emerald-600",
   unavailable: "bg-rose-50 text-rose-500",
@@ -6,7 +9,7 @@ const STATUS_STYLES = {
 
 export default function RoomCard({ room }) {
   const {
-    room_no,
+    room_number,
     room_type,
     status,
     floor,
@@ -21,6 +24,8 @@ export default function RoomCard({ room }) {
     capacity,
   } = room;
 
+  const [open, setOpen] = useState(false);
+
   const FALLBACK =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuBtj_ll0EvahWA2ilfxtrHzindUOyrdnpmq58_4LwhMKf3Cs8vvNqZG0-nd2PvpuQ5eV3nPR7-dlwsJJV3U2Gsn31PaSSA4R8TyKtTA_Dxd2YTqLh7aiPv-Il7HUBjUsFNH5pVILQ0P9QX3gUhIITFAwXewOw6u2ldTBFzT3X-B40quD3HauV16oU0an70jiRifC5scbN6tPKQ-VxoePz__kgmcSz7dGyS80ttxBDCbpxV1Ei6Kj2BSZAa0MGew-BabqZ42hie_2es";
 
@@ -33,7 +38,7 @@ export default function RoomCard({ room }) {
       <div className="relative aspect-[2/1] overflow-hidden">
         <img
           src={room_photo?.url || FALLBACK}
-          alt={room_no}
+          alt={room_number}
           onError={(e) => (e.currentTarget.src = FALLBACK)}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -52,7 +57,9 @@ export default function RoomCard({ room }) {
       {/* Body */}
       <div className="p-3">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-bold text-slate-900">Room {room_no}</h3>
+          <h3 className="text-sm font-bold text-slate-900">
+            Room {room_number}
+          </h3>
           <p className="text-sm font-extrabold text-indigo-600">
             {symbol}
             {price_per_month?.toLocaleString("en-IN")}
@@ -124,9 +131,17 @@ export default function RoomCard({ room }) {
               year: "numeric",
             })}
           </div>
-          <button className="bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold hover:bg-indigo-600 transition-colors">
-            Book Now
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold hover:bg-indigo-600 transition-colors"
+          >
+            Edit
           </button>
+          <EditRoomModal
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            room={room}
+          />
         </div>
       </div>
     </div>

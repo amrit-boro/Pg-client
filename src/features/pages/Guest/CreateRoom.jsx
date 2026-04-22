@@ -508,11 +508,7 @@ function ModalContent({ onClose, onSuccess }) {
                     value={form.currency}
                     onChange={set("currency")}
                   >
-                    <option value="USD">USD</option>
                     <option value="INR">INR</option>
-                    <option value="EUR">EUR</option>
-                    <option value="GBP">GBP</option>
-                    <option value="AED">AED</option>
                   </select>
                 </Field>
               </div>

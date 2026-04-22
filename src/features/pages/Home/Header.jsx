@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Header() {
   // const { data: user, isLoggedIn, error } = useGetUser();
+  const navigate = useNavigate();
   const isLoggedIn = true;
   const user = {
     data: {
@@ -87,6 +88,7 @@ function Header() {
               </Link>
             )}
           </div>
+          <div onClick={() => navigate("/account")}>Become</div>
         </div>
       </div>
     </header>

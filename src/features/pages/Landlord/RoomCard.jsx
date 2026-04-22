@@ -137,13 +137,9 @@ export default function RoomCard({ room }) {
           >
             Edit
           </button>
-          <EditRoomModal
-            isOpen={open}
-            onClose={() => setOpen(false)}
-            room={room}
-          />
         </div>
       </div>
+      <EditRoomModal isOpen={open} onClose={() => setOpen(false)} room={room} />
     </div>
   );
 }

@@ -11,11 +11,11 @@ import LandlordCrud from "./features/pages/Landlord/LandlordCrud";
 
 import AigeneratedDes from "./features/pages/Landlord/AigeneratedDes";
 import StayEasyRoom from "./features/pages/RoomList/StayEasyRoom";
-import Profile from "./features/pages/Guest/Account";
 import MyRooms from "./features/pages/Landlord/Myrooms";
 import SavedListings from "./features/pages/Landlord/SavedListings";
 import CreateRoom from "./features/pages/Guest/CreateRoom";
 import Account from "./features/pages/Guest/Account";
+import Profile from "./features/pages/Landlord/Profile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,7 +39,7 @@ const router = createBrowserRouter([
           { index: true, element: <MyRooms /> }, // /account
           { path: "rooms", element: <MyRooms /> }, // /account/rooms
           { path: "saved", element: <SavedListings /> }, // /account/saved  👈 add this back
-          // { path: "profile", element: <Profile /> },
+          { path: "profile", element: <Profile /> },
         ],
       },
       { path: "/guest", element: <GuestaProfile /> },
